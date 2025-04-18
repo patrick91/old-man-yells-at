@@ -15,6 +15,10 @@ app = FastAPI(title="Meme Generator API")
 TEMPLATE_PATH = os.path.join("assets", "template.png")
 template_image = Image.open(TEMPLATE_PATH)
 
+LOGO_API_TOKEN = os.getenv(
+    "LOGO_API_TOKEN", "REDACTED_TOKEN"
+)  # Get token from environment variable
+
 
 def is_svg_url(url: str) -> bool:
     """Check if the URL points to an SVG file."""
@@ -161,6 +165,40 @@ async def generate_meme(image_url: str):
     img_byte_arr.seek(0)
 
     return StreamingResponse(img_byte_arr, media_type="image/png")
+
+
+@app.get("/{search}")
+async def generate_logo_meme(search: str):
+    """
+    Generate a meme using a company logo from Logo.dev API.
+
+    Args:
+        domain: The company domain (e.g., 'microsoft.com')
+    """
+    if not LOGO_API_TOKEN:
+        raise HTTPException(
+            status_code=500,
+            detail="Logo API token not configured. Please set LOGO_API_TOKEN environment variable.",
+        )
+
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            "https://api.logo.dev/search",
+            params={"q": search},
+            headers={"Authorization": f"Bearer: {LOGO_API_TOKEN}"},
+        )
+        response.raise_for_status()
+        logos = response.json()
+
+        if not logos:
+            raise HTTPException(
+                status_code=404, detail="No logos found for the given search query"
+            )
+
+        logo_url = logos[0]["logo_url"] + "&format=png"
+
+    # Use the existing generate_meme function with the logo URL
+    return await generate_meme(logo_url)
 
 
 if __name__ == "__main__":
