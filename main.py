@@ -5,9 +5,16 @@ import httpx
 from io import BytesIO
 import io
 import os
-import cairosvg
 import re
-import numpy as np
+
+try:
+    import cairosvg
+except Exception:
+    print("Unable to import cairosvg")
+
+    HAS_CAIRO = False
+else:
+    HAS_CAIRO = True
 
 app = FastAPI(title="Meme Generator API")
 
@@ -33,9 +40,14 @@ async def download_image(url: str) -> Image.Image:
             content = response.content
 
             if is_svg_url(url):
-                # Convert SVG to PNG using cairosvg
-                png_data = cairosvg.svg2png(bytestring=content)
-                return Image.open(BytesIO(png_data))
+                if HAS_CAIRO:
+                    # Convert SVG to PNG using cairosvg
+                    png_data = cairosvg.svg2png(bytestring=content)
+                    return Image.open(BytesIO(png_data))
+                else:
+                    raise HTTPException(
+                        status_code=500, detail="Cairo is not installed"
+                    )
             else:
                 return Image.open(BytesIO(content))
     except Exception as e:
