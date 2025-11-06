@@ -34,28 +34,21 @@ def is_svg_url(url: str) -> bool:
 
 
 async def download_image(url: str) -> Image.Image:
-    try:
-        async with httpx.AsyncClient(follow_redirects=True) as client:
-            response = await client.get(url)
-            response.raise_for_status()
-            content = response.content
+    async with httpx.AsyncClient(follow_redirects=True) as client:
+        response = await client.get(url)
+        response.raise_for_status()
+        content = response.content
 
-            if is_svg_url(url):
-                if HAS_CAIRO:
-                    # Convert SVG to PNG using cairosvg
-                    png_data = cairosvg.svg2png(bytestring=content)
-                    return Image.open(BytesIO(png_data))
-                else:
-                    raise HTTPException(
-                        status_code=500, detail="Cairo is not installed"
-                    )
+        if is_svg_url(url):
+            if HAS_CAIRO:
+                # Convert SVG to PNG using cairosvg
+                png_data = cairosvg.svg2png(bytestring=content)
+                return Image.open(BytesIO(png_data))
             else:
-                return Image.open(BytesIO(content))
-    except Exception as e:
-        print(e)
-        raise HTTPException(
-            status_code=400, detail=f"Failed to download or process image: {str(e)}"
-        )
+                raise HTTPException(status_code=500, detail="Cairo is not installed")
+        else:
+            print("opening image")
+            return Image.open(BytesIO(content))
 
 
 def resize_image(
@@ -186,21 +179,47 @@ def is_twitter_username(text: str) -> bool:
     return bool(re.match(r"^@?[A-Za-z0-9_]{1,15}$", text))
 
 
-async def get_unavatar_image(username: str, provider: str = "x") -> str:
+async def get_twitter_avatar(username: str) -> str:
     """
-    Get profile image URL from unavatar.io service.
+    Get profile image URL directly from Twitter/X by scraping the profile page.
 
     Args:
         username: Username (with or without @)
 
     Returns:
-        Profile image URL from unavatar.io
+        Profile image URL from Twitter/X
     """
     # Remove @ if present
     username = username.lstrip("@")
 
-    # Return unavatar.io URL
-    return f"https://unavatar.io/{provider}/{username}"
+    # Fetch the Twitter profile page with a bot user agent
+    async with httpx.AsyncClient(follow_redirects=True) as client:
+        response = await client.get(
+            f"https://x.com/{username}",
+            headers={
+                "user-agent": "Slackbot-LinkExpanding 1.0 (+https://api.slack.com/robots)"
+            },
+        )
+        response.raise_for_status()
+
+        # Extract og:image from the HTML (handle both attribute orders)
+        match = re.search(
+            r'<meta[^>]+property="og:image"[^>]+content="([^"]+)"', response.text
+        ) or re.search(
+            r'<meta[^>]+content="([^"]+)"[^>]+property="og:image"', response.text
+        )
+        if not match:
+            raise HTTPException(
+                status_code=404, detail=f"Could not find avatar for @{username}"
+            )
+
+        avatar_url = match.group(1)
+
+        # Upgrade to higher resolution if possible
+        if avatar_url.endswith("_200x200.jpg"):
+            avatar_url = avatar_url.replace("_200x200.jpg", "_400x400.jpg")
+
+        return avatar_url
 
 
 @app.get("/{search}")
@@ -213,8 +232,8 @@ async def generate_logo_meme(search: str):
     """
     # Check if it's a Twitter username
     if is_twitter_username(search):
-        # Get profile image from unavatar.io
-        image_url = await get_unavatar_image(search)
+        # Get profile image directly from Twitter/X
+        image_url = await get_twitter_avatar(search)
 
         return await generate_meme(image_url)
 
