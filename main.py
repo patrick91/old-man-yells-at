@@ -126,7 +126,7 @@ def trim_image(
 
 
 @app.get("/generate-meme")
-async def generate_meme(image_url: str):
+async def generate_meme(image_url: str, filename: str = "meme.png"):
     left_anchor = 230
     top_anchor = 230
     max_width = 300
@@ -171,7 +171,11 @@ async def generate_meme(image_url: str):
     final_meme.save(img_byte_arr, format="PNG")
     img_byte_arr.seek(0)
 
-    return StreamingResponse(img_byte_arr, media_type="image/png")
+    return StreamingResponse(
+        img_byte_arr,
+        media_type="image/png",
+        headers={"Content-Disposition": f'inline; filename="{filename}"'},
+    )
 
 
 def is_twitter_username(text: str) -> bool:
@@ -234,8 +238,11 @@ async def generate_logo_meme(search: str):
     if is_twitter_username(search):
         # Get profile image directly from Twitter/X
         image_url = await get_twitter_avatar(search)
+        # Remove @ if present for filename
+        username = search.lstrip("@")
+        filename = f"old-man-yells-at-{username}.png"
 
-        return await generate_meme(image_url)
+        return await generate_meme(image_url, filename)
 
     # Use Logo API for company logos
     if not LOGO_API_TOKEN:
