@@ -10,4 +10,17 @@ dependencies = [
     "pillow>=11.2.1",
     "cairosvg>=2.7.1",
     "numpy>=1.24.0",
+    "fastapi-cli>=0.0.7",
+    "fastapi-cloud-cli>=0.1.0",
+    "beautifulsoup4>=4.13.4",
 ]
+
+[[tool.uv.index]]
+url = "https://pypi.python.org/simple"
+
+[[tool.uv.index]]
+url = "https://fastapi-cli.pages.dev/simple"
+default = true
+
+[dependency-groups]
+dev = []

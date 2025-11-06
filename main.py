@@ -179,14 +179,44 @@ async def generate_meme(image_url: str):
     return StreamingResponse(img_byte_arr, media_type="image/png")
 
 
+def is_twitter_username(text: str) -> bool:
+    """Check if the text looks like a Twitter username."""
+    return bool(re.match(r"^@?[A-Za-z0-9_]{1,15}$", text))
+
+
+async def get_unavatar_image(username: str, provider: str = "x") -> str:
+    """
+    Get profile image URL from unavatar.io service.
+
+    Args:
+        username: Username (with or without @)
+
+    Returns:
+        Profile image URL from unavatar.io
+    """
+    # Remove @ if present
+    username = username.lstrip("@")
+
+    # Return unavatar.io URL
+    return f"https://unavatar.io/{provider}/{username}"
+
+
 @app.get("/{search}")
 async def generate_logo_meme(search: str):
     """
-    Generate a meme using a company logo from Logo.dev API.
+    Generate a meme using a company logo from Logo.dev API or profile image from unavatar.io.
 
     Args:
-        domain: The company domain (e.g., 'microsoft.com')
+        search: The company domain (e.g., 'microsoft.com') or username (e.g., '@patrick91')
     """
+    # Check if it's a Twitter username
+    if is_twitter_username(search):
+        # Get profile image from unavatar.io
+        image_url = await get_unavatar_image(search)
+
+        return await generate_meme(image_url)
+
+    # Use Logo API for company logos
     if not LOGO_API_TOKEN:
         raise HTTPException(
             status_code=500,
