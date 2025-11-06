@@ -1,11 +1,12 @@
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import StreamingResponse
-from PIL import Image
-import httpx
-from io import BytesIO
 import io
 import os
 import re
+from io import BytesIO
+
+import httpx
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import StreamingResponse
+from PIL import Image
 
 try:
     import cairosvg
@@ -51,6 +52,7 @@ async def download_image(url: str) -> Image.Image:
             else:
                 return Image.open(BytesIO(content))
     except Exception as e:
+        print(e)
         raise HTTPException(
             status_code=400, detail=f"Failed to download or process image: {str(e)}"
         )
