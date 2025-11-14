@@ -28,7 +28,7 @@ jobs:
         run: uv sync --group dev
 
       - name: Run tests
-        run: uv run pytest tests/ -v --tb=short
+        run: uv run pytest tests/ -v --tb=short --inline-snapshot=short-report
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v5
