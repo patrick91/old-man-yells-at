@@ -7,7 +7,7 @@ import respx
 from fastapi.testclient import TestClient
 from PIL import Image
 
-from main import app
+from app.main import app
 
 client = TestClient(app)
 

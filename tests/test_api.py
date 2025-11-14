@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 from inline_snapshot import snapshot
 from PIL import Image
 
-from main import app
+from app.main import app
 
 client = TestClient(app)
 

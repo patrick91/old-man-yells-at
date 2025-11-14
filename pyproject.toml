@@ -64,3 +64,6 @@ exclude = [
     "**/__pycache__",
     ".venv",
 ]
+
+[tool.fastapi]
+entrypoint = "app.main:app"
