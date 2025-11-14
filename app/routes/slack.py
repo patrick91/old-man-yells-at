@@ -4,9 +4,8 @@ import hashlib
 import hmac
 import time
 
-from fastapi import APIRouter, HTTPException, Request
-from slack_sdk import WebClient
-from slack_sdk.errors import SlackApiError
+import httpx
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 
 from app import config
 from app.services.meme_generator import generate_meme
@@ -35,8 +34,64 @@ def verify_slack_request(
     return hmac.compare_digest(my_signature, signature)
 
 
+async def generate_and_send_meme(target: str, response_url: str, base_url: str):
+    """Background task to generate meme and send to Slack with image."""
+    try:
+        # Import here to avoid circular dependency
+        from urllib.parse import quote
+
+        from app.services.logo_api import search_logo
+        from app.services.twitter import get_twitter_avatar, is_twitter_username
+
+        # Determine if it's a Twitter username or company domain
+        if is_twitter_username(target):
+            image_url = await get_twitter_avatar(target)
+        else:
+            image_url = await search_logo(target)
+
+        # Generate the meme (this validates the image can be generated)
+        await generate_meme(image_url)
+
+        # Create URL for the generated meme
+        meme_url = f"{base_url}/generate-meme?image_url={quote(image_url)}"
+
+        # Send success message with image to Slack
+        async with httpx.AsyncClient() as client:
+            await client.post(
+                response_url,
+                json={
+                    "response_type": "in_channel",
+                    "blocks": [
+                        {
+                            "type": "section",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": f"*Old Man Yells At {target}!* 👴☁️",
+                            },
+                        },
+                        {
+                            "type": "image",
+                            "image_url": meme_url,
+                            "alt_text": f"Old Man Yells At {target}",
+                        },
+                    ],
+                },
+            )
+
+    except Exception as e:
+        # Send error message back to Slack
+        async with httpx.AsyncClient() as client:
+            await client.post(
+                response_url,
+                json={
+                    "response_type": "ephemeral",
+                    "text": f"❌ Failed to generate meme: {str(e)}",
+                },
+            )
+
+
 @router.post("/slack/commands/old-man-yells-at")
-async def old_man_yells_at(request: Request):
+async def old_man_yells_at(request: Request, background_tasks: BackgroundTasks):
     """
     Handle the /old-man-yells-at Slack slash command.
 
@@ -64,7 +119,7 @@ async def old_man_yells_at(request: Request):
     # Parse form data (body is cached, so this works after reading it)
     form_data = await request.form()
     text = str(form_data.get("text", ""))
-    channel_id = str(form_data.get("channel_id", ""))
+    response_url = str(form_data.get("response_url", ""))
 
     # Validate input
     if not text or not text.strip():
@@ -75,53 +130,14 @@ async def old_man_yells_at(request: Request):
 
     target = text.strip()
 
-    try:
-        # Import here to avoid circular dependency
-        from app.services.logo_api import search_logo
-        from app.services.twitter import get_twitter_avatar, is_twitter_username
+    # Get base URL from request
+    base_url = f"{request.url.scheme}://{request.url.netloc}"
 
-        # Determine if it's a Twitter username or company domain
-        if is_twitter_username(target):
-            image_url = await get_twitter_avatar(target)
-        else:
-            image_url = await search_logo(target)
+    # Add background task to generate and send meme
+    background_tasks.add_task(generate_and_send_meme, target, response_url, base_url)
 
-        # Generate the meme
-        meme_bytes = await generate_meme(image_url)
-
-        # Upload to Slack if we have a bot token
-        if config.SLACK_BOT_TOKEN and channel_id:
-            client = WebClient(token=config.SLACK_BOT_TOKEN)
-
-            # Upload the file to the channel where the command was invoked
-            client.files_upload_v2(
-                channel=channel_id,
-                file=meme_bytes,
-                filename=f"old-man-yells-at-{target.replace('@', '')}.png",
-                title=f"Old Man Yells At {target}",
-            )
-
-            # Return empty response - the file upload will show the image
-            return {"text": ""}
-        else:
-            # If no bot token, just return a message
-            return {
-                "response_type": "ephemeral",
-                "text": f"✅ Meme generated for {target}! (Configure SLACK_BOT_TOKEN to upload images)",
-            }
-
-    except SlackApiError as e:
-        return {
-            "response_type": "ephemeral",
-            "text": f"Failed to upload to Slack: {e.response['error']}",
-        }
-    except HTTPException as e:
-        return {
-            "response_type": "ephemeral",
-            "text": f"Error: {e.detail}",
-        }
-    except Exception as e:
-        return {
-            "response_type": "ephemeral",
-            "text": f"An unexpected error occurred: {str(e)}",
-        }
+    # Return immediate response (Slack requires response within 3 seconds)
+    return {
+        "response_type": "ephemeral",
+        "text": f"🎨 Generating meme for {target}...",
+    }

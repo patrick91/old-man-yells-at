@@ -47,7 +47,6 @@ def test_slack_command_without_text():
     data = {
         "text": "",
         "response_url": "https://hooks.slack.com/commands/123",
-        "channel_id": "C1234567890",
     }
     secret = "test-secret"
     signature = create_slack_signature(data, timestamp, secret)
@@ -89,19 +88,20 @@ def test_slack_command_with_twitter_username():
         return_value=httpx.Response(200, content=test_img)
     )
 
+    # Mock Slack response_url webhook
+    respx.post("https://hooks.slack.com/commands/123").mock(
+        return_value=httpx.Response(200, text="ok")
+    )
+
     timestamp = str(int(time.time()))
     data = {
         "text": "@patrick91",
         "response_url": "https://hooks.slack.com/commands/123",
-        "channel_id": "C1234567890",
     }
     secret = "test-secret"
     signature = create_slack_signature(data, timestamp, secret)
 
-    with (
-        patch("app.config.SLACK_SIGNING_SECRET", secret),
-        patch("app.config.SLACK_BOT_TOKEN", None),
-    ):
+    with patch("app.config.SLACK_SIGNING_SECRET", secret):
         response = client.post(
             "/slack/commands/old-man-yells-at",
             data=data,
@@ -113,7 +113,7 @@ def test_slack_command_with_twitter_username():
 
     assert response.status_code == 200
     json_response = response.json()
-    assert "patrick91" in json_response["text"]
+    assert "Generating meme" in json_response["text"]
     assert json_response["response_type"] == "ephemeral"
 
 
@@ -139,19 +139,20 @@ def test_slack_command_with_company_domain():
         return_value=httpx.Response(200, content=test_logo)
     )
 
+    # Mock Slack response_url webhook
+    respx.post("https://hooks.slack.com/commands/123").mock(
+        return_value=httpx.Response(200, text="ok")
+    )
+
     timestamp = str(int(time.time()))
     data = {
         "text": "python.org",
         "response_url": "https://hooks.slack.com/commands/123",
-        "channel_id": "C1234567890",
     }
     secret = "test-secret"
     signature = create_slack_signature(data, timestamp, secret)
 
-    with (
-        patch("app.config.SLACK_SIGNING_SECRET", secret),
-        patch("app.config.SLACK_BOT_TOKEN", None),
-    ):
+    with patch("app.config.SLACK_SIGNING_SECRET", secret):
         response = client.post(
             "/slack/commands/old-man-yells-at",
             data=data,
@@ -177,7 +178,6 @@ def test_slack_command_invalid_signature():
             data={
                 "text": "@patrick91",
                 "response_url": "https://hooks.slack.com/commands/123",
-                "channel_id": "C1234567890",
             },
             headers={
                 "X-Slack-Request-Timestamp": timestamp,
@@ -196,7 +196,6 @@ def test_slack_command_old_timestamp():
     data = {
         "text": "@patrick91",
         "response_url": "https://hooks.slack.com/commands/123",
-        "channel_id": "C1234567890",
     }
     secret = "test-secret"
     signature = create_slack_signature(data, old_timestamp, secret)
