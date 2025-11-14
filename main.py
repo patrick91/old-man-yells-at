@@ -9,13 +9,12 @@ from fastapi.responses import StreamingResponse
 from PIL import Image
 
 try:
-    import cairosvg
+    import cairosvg  # type: ignore[import-not-found]
 except Exception:
     print("Unable to import cairosvg")
+    cairosvg = None  # type: ignore[assignment]
 
-    HAS_CAIRO = False
-else:
-    HAS_CAIRO = True
+HAS_CAIRO = cairosvg is not None
 
 app = FastAPI(title="Meme Generator API")
 
@@ -40,9 +39,13 @@ async def download_image(url: str) -> Image.Image:
         content = response.content
 
         if is_svg_url(url):
-            if HAS_CAIRO:
+            if HAS_CAIRO and cairosvg is not None:
                 # Convert SVG to PNG using cairosvg
                 png_data = cairosvg.svg2png(bytestring=content)
+                if png_data is None:
+                    raise HTTPException(
+                        status_code=500, detail="Failed to convert SVG to PNG"
+                    )
                 return Image.open(BytesIO(png_data))
             else:
                 raise HTTPException(status_code=500, detail="Cairo is not installed")
