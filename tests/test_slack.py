@@ -47,6 +47,7 @@ def test_slack_command_without_text():
     data = {
         "text": "",
         "response_url": "https://hooks.slack.com/commands/123",
+        "channel_id": "C1234567890",
     }
     secret = "test-secret"
     signature = create_slack_signature(data, timestamp, secret)
@@ -92,11 +93,15 @@ def test_slack_command_with_twitter_username():
     data = {
         "text": "@patrick91",
         "response_url": "https://hooks.slack.com/commands/123",
+        "channel_id": "C1234567890",
     }
     secret = "test-secret"
     signature = create_slack_signature(data, timestamp, secret)
 
-    with patch("app.config.SLACK_SIGNING_SECRET", secret):
+    with (
+        patch("app.config.SLACK_SIGNING_SECRET", secret),
+        patch("app.config.SLACK_BOT_TOKEN", None),
+    ):
         response = client.post(
             "/slack/commands/old-man-yells-at",
             data=data,
@@ -138,11 +143,15 @@ def test_slack_command_with_company_domain():
     data = {
         "text": "python.org",
         "response_url": "https://hooks.slack.com/commands/123",
+        "channel_id": "C1234567890",
     }
     secret = "test-secret"
     signature = create_slack_signature(data, timestamp, secret)
 
-    with patch("app.config.SLACK_SIGNING_SECRET", secret):
+    with (
+        patch("app.config.SLACK_SIGNING_SECRET", secret),
+        patch("app.config.SLACK_BOT_TOKEN", None),
+    ):
         response = client.post(
             "/slack/commands/old-man-yells-at",
             data=data,
@@ -168,6 +177,7 @@ def test_slack_command_invalid_signature():
             data={
                 "text": "@patrick91",
                 "response_url": "https://hooks.slack.com/commands/123",
+                "channel_id": "C1234567890",
             },
             headers={
                 "X-Slack-Request-Timestamp": timestamp,
@@ -186,6 +196,7 @@ def test_slack_command_old_timestamp():
     data = {
         "text": "@patrick91",
         "response_url": "https://hooks.slack.com/commands/123",
+        "channel_id": "C1234567890",
     }
     secret = "test-secret"
     signature = create_slack_signature(data, old_timestamp, secret)
