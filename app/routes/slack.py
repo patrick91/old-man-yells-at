@@ -159,68 +159,52 @@ async def handle_interactivity(request: Request):
 
     This endpoint receives button click events from Slack.
     """
-    try:
-        # Get headers for signature verification
-        timestamp = request.headers.get("X-Slack-Request-Timestamp", "")
-        signature = request.headers.get("X-Slack-Signature", "")
+    # Get headers for signature verification
+    timestamp = request.headers.get("X-Slack-Request-Timestamp", "")
+    signature = request.headers.get("X-Slack-Signature", "")
 
-        # Verify the request is from Slack (only if signing secret is configured)
-        if config.SLACK_SIGNING_SECRET:
-            # Read body for signature verification
-            body = await request.body()
+    # Verify the request is from Slack (only if signing secret is configured)
+    if config.SLACK_SIGNING_SECRET:
+        # Read body for signature verification
+        body = await request.body()
 
-            if not verify_slack_request(
-                body,
-                timestamp,
-                signature,
-                config.SLACK_SIGNING_SECRET,
-            ):
-                raise HTTPException(status_code=403, detail="Invalid request signature")
+        if not verify_slack_request(
+            body,
+            timestamp,
+            signature,
+            config.SLACK_SIGNING_SECRET,
+        ):
+            raise HTTPException(status_code=403, detail="Invalid request signature")
 
-        # Parse form data - Slack sends interactivity payloads as form-encoded
-        form_data = await request.form()
-        payload = json.loads(str(form_data.get("payload", "{}")))
+    # Parse form data - Slack sends interactivity payloads as form-encoded
+    form_data = await request.form()
+    payload = json.loads(str(form_data.get("payload", "{}")))
 
-        print(f"Received interactivity payload: {payload.get('type')}")
+    # Handle button click
+    if payload.get("type") == "block_actions":
+        action = payload["actions"][0]
 
-        # Handle button click
-        if payload.get("type") == "block_actions":
-            action = payload["actions"][0]
+        if action["action_id"] == "post_meme":
+            meme_url = action["value"]
+            response_url = payload["response_url"]
 
-            if action["action_id"] == "post_meme":
-                meme_url = action["value"]
+            async with httpx.AsyncClient() as client:
+                # Post to channel (replace original message with public post)
+                await client.post(
+                    response_url,
+                    json={
+                        "replace_original": True,
+                        "response_type": "in_channel",
+                        "blocks": [
+                            {
+                                "type": "image",
+                                "image_url": meme_url,
+                                "alt_text": "Old Man Yells At Cloud",
+                            }
+                        ],
+                    },
+                )
 
-                # Post the meme to the channel using response_url
-                response_url = payload["response_url"]
+            return {}
 
-                print(f"Posting meme to channel: {meme_url}")
-
-                async with httpx.AsyncClient() as client:
-                    # Post to channel (replace original message with public post)
-                    resp = await client.post(
-                        response_url,
-                        json={
-                            "replace_original": True,
-                            "response_type": "in_channel",
-                            "blocks": [
-                                {
-                                    "type": "image",
-                                    "image_url": meme_url,
-                                    "alt_text": "Old Man Yells At Cloud",
-                                }
-                            ],
-                        },
-                    )
-                    print(f"Slack response: {resp.status_code} - {resp.text}")
-
-                # Return empty response to acknowledge
-                return {}
-
-        return {}
-
-    except Exception as e:
-        print(f"Error in interactivity handler: {e}")
-        import traceback
-
-        traceback.print_exc()
-        return {"error": str(e)}
+    return {}
