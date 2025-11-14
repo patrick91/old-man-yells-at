@@ -2,6 +2,7 @@
 
 import hashlib
 import hmac
+import json
 import time
 
 import httpx
@@ -35,7 +36,7 @@ def verify_slack_request(
 
 
 async def generate_and_send_meme(target: str, response_url: str, base_url: str):
-    """Background task to generate meme and send to Slack with image."""
+    """Background task to generate meme and send ephemeral preview with button."""
     try:
         # Import here to avoid circular dependency
         from urllib.parse import quote
@@ -55,24 +56,32 @@ async def generate_and_send_meme(target: str, response_url: str, base_url: str):
         # Create URL for the generated meme
         meme_url = f"{base_url}/generate-meme?image_url={quote(image_url)}"
 
-        # Send success message with image to Slack
+        # Send ephemeral preview with "Post to Channel" button
         async with httpx.AsyncClient() as client:
             await client.post(
                 response_url,
                 json={
-                    "response_type": "in_channel",
+                    "response_type": "ephemeral",
                     "blocks": [
-                        {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": f"*Old Man Yells At {target}!* 👴☁️",
-                            },
-                        },
                         {
                             "type": "image",
                             "image_url": meme_url,
                             "alt_text": f"Old Man Yells At {target}",
+                        },
+                        {
+                            "type": "actions",
+                            "elements": [
+                                {
+                                    "type": "button",
+                                    "text": {
+                                        "type": "plain_text",
+                                        "text": "📣 Post to Channel",
+                                    },
+                                    "style": "primary",
+                                    "value": meme_url,
+                                    "action_id": "post_meme",
+                                }
+                            ],
                         },
                     ],
                 },
@@ -141,3 +150,70 @@ async def old_man_yells_at(request: Request, background_tasks: BackgroundTasks):
         "response_type": "ephemeral",
         "text": f"🎨 Generating meme for {target}...",
     }
+
+
+@router.post("/slack/interactivity")
+async def handle_interactivity(request: Request):
+    """
+    Handle Slack interactive components (button clicks, etc.).
+
+    This endpoint receives button click events from Slack.
+    """
+    # Get headers for signature verification
+    timestamp = request.headers.get("X-Slack-Request-Timestamp", "")
+    signature = request.headers.get("X-Slack-Signature", "")
+
+    # Verify the request is from Slack (only if signing secret is configured)
+    if config.SLACK_SIGNING_SECRET:
+        # Read body for signature verification
+        body = await request.body()
+
+        if not verify_slack_request(
+            body,
+            timestamp,
+            signature,
+            config.SLACK_SIGNING_SECRET,
+        ):
+            raise HTTPException(status_code=403, detail="Invalid request signature")
+
+    # Parse form data - Slack sends interactivity payloads as form-encoded
+    form_data = await request.form()
+    payload = json.loads(str(form_data.get("payload", "{}")))
+
+    # Handle button click
+    if payload.get("type") == "block_actions":
+        action = payload["actions"][0]
+
+        if action["action_id"] == "post_meme":
+            meme_url = action["value"]
+
+            # Post the meme to the channel using response_url
+            response_url = payload["response_url"]
+
+            async with httpx.AsyncClient() as client:
+                # Delete the ephemeral message and post publicly
+                await client.post(
+                    response_url,
+                    json={
+                        "delete_original": True,
+                    },
+                )
+
+                # Post to channel
+                await client.post(
+                    response_url,
+                    json={
+                        "response_type": "in_channel",
+                        "blocks": [
+                            {
+                                "type": "image",
+                                "image_url": meme_url,
+                                "alt_text": "Old Man Yells At Cloud",
+                            }
+                        ],
+                    },
+                )
+
+            return {"ok": True}
+
+    return {"ok": True}
