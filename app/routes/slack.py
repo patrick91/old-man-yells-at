@@ -159,61 +159,68 @@ async def handle_interactivity(request: Request):
 
     This endpoint receives button click events from Slack.
     """
-    # Get headers for signature verification
-    timestamp = request.headers.get("X-Slack-Request-Timestamp", "")
-    signature = request.headers.get("X-Slack-Signature", "")
+    try:
+        # Get headers for signature verification
+        timestamp = request.headers.get("X-Slack-Request-Timestamp", "")
+        signature = request.headers.get("X-Slack-Signature", "")
 
-    # Verify the request is from Slack (only if signing secret is configured)
-    if config.SLACK_SIGNING_SECRET:
-        # Read body for signature verification
-        body = await request.body()
+        # Verify the request is from Slack (only if signing secret is configured)
+        if config.SLACK_SIGNING_SECRET:
+            # Read body for signature verification
+            body = await request.body()
 
-        if not verify_slack_request(
-            body,
-            timestamp,
-            signature,
-            config.SLACK_SIGNING_SECRET,
-        ):
-            raise HTTPException(status_code=403, detail="Invalid request signature")
+            if not verify_slack_request(
+                body,
+                timestamp,
+                signature,
+                config.SLACK_SIGNING_SECRET,
+            ):
+                raise HTTPException(status_code=403, detail="Invalid request signature")
 
-    # Parse form data - Slack sends interactivity payloads as form-encoded
-    form_data = await request.form()
-    payload = json.loads(str(form_data.get("payload", "{}")))
+        # Parse form data - Slack sends interactivity payloads as form-encoded
+        form_data = await request.form()
+        payload = json.loads(str(form_data.get("payload", "{}")))
 
-    # Handle button click
-    if payload.get("type") == "block_actions":
-        action = payload["actions"][0]
+        print(f"Received interactivity payload: {payload.get('type')}")
 
-        if action["action_id"] == "post_meme":
-            meme_url = action["value"]
+        # Handle button click
+        if payload.get("type") == "block_actions":
+            action = payload["actions"][0]
 
-            # Post the meme to the channel using response_url
-            response_url = payload["response_url"]
+            if action["action_id"] == "post_meme":
+                meme_url = action["value"]
 
-            async with httpx.AsyncClient() as client:
-                # Delete the ephemeral message and post publicly
-                await client.post(
-                    response_url,
-                    json={
-                        "delete_original": True,
-                    },
-                )
+                # Post the meme to the channel using response_url
+                response_url = payload["response_url"]
 
-                # Post to channel
-                await client.post(
-                    response_url,
-                    json={
-                        "response_type": "in_channel",
-                        "blocks": [
-                            {
-                                "type": "image",
-                                "image_url": meme_url,
-                                "alt_text": "Old Man Yells At Cloud",
-                            }
-                        ],
-                    },
-                )
+                print(f"Posting meme to channel: {meme_url}")
 
-            return {"ok": True}
+                async with httpx.AsyncClient() as client:
+                    # Post to channel (replace original message with public post)
+                    resp = await client.post(
+                        response_url,
+                        json={
+                            "replace_original": True,
+                            "response_type": "in_channel",
+                            "blocks": [
+                                {
+                                    "type": "image",
+                                    "image_url": meme_url,
+                                    "alt_text": "Old Man Yells At Cloud",
+                                }
+                            ],
+                        },
+                    )
+                    print(f"Slack response: {resp.status_code} - {resp.text}")
 
-    return {"ok": True}
+                # Return empty response to acknowledge
+                return {}
+
+        return {}
+
+    except Exception as e:
+        print(f"Error in interactivity handler: {e}")
+        import traceback
+
+        traceback.print_exc()
+        return {"error": str(e)}
