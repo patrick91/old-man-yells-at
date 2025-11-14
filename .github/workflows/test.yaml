@@ -28,7 +28,7 @@ jobs:
         run: uv sync --group dev
 
       - name: Run tests
-        run: uv run pytest tests/ -v --tb=short --ignore=tests/test_snapshots.py
+        run: uv run pytest tests/ -v --tb=short --image-snapshot-fail-if-missing
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v5

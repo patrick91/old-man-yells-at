@@ -1,15 +1,13 @@
+"""Visual regression tests for meme generation using pytest-image-snapshot."""
+
 from io import BytesIO
 
 import httpx
 import respx
 from fastapi.testclient import TestClient
-from inline_snapshot import external, register_format_alias, snapshot
 from PIL import Image
 
 from main import app
-
-# Register .png as an alias for .bin format so PNG files are stored as binary
-register_format_alias(".png", ".bin")
 
 client = TestClient(app)
 
@@ -23,8 +21,8 @@ def create_test_image(width: int = 100, height: int = 100, color=(255, 0, 0)) ->
 
 
 @respx.mock
-def test_generate_meme_snapshot():
-    """Test meme generation with external PNG snapshot."""
+def test_generate_meme_snapshot(image_snapshot):
+    """Test meme generation with visual snapshot."""
     # Mock image download
     test_img = create_test_image(200, 200, (0, 255, 0))
     respx.get("https://example.com/test-logo.png").mock(
@@ -42,13 +40,15 @@ def test_generate_meme_snapshot():
     assert response.status_code == 200
     assert response.headers["content-type"] == "image/png"
 
-    # Use external snapshot to store the generated PNG
-    assert response.content == external("uuid:5261deeb-bfc5-41ec-8d2a-422df4d126da.png")
+    # Compare the generated meme with the snapshot
+    # Use a threshold for anti-aliasing tolerance (0.1 = 10% difference allowed)
+    image = Image.open(BytesIO(response.content))
+    image_snapshot(image, "tests/snapshots/test_generate_meme.png", threshold=0.1)
 
 
 @respx.mock
-def test_twitter_meme_snapshot():
-    """Test Twitter meme generation with external PNG snapshot."""
+def test_twitter_meme_snapshot(image_snapshot):
+    """Test Twitter meme generation with visual snapshot."""
     # Mock Twitter profile page
     html_content = """
     <html>
@@ -72,17 +72,16 @@ def test_twitter_meme_snapshot():
 
     assert response.status_code == 200
     assert response.headers["content-type"] == "image/png"
+    assert "old-man-yells-at-patrick91.png" in response.headers["content-disposition"]
 
     # Verify the generated meme matches the snapshot
-    assert response.content == external("uuid:6e6290a7-0654-4cce-8062-f8dd3fc4ca6b.png")
-
-    # Also verify the filename
-    assert "old-man-yells-at-patrick91.png" in response.headers["content-disposition"]
+    image = Image.open(BytesIO(response.content))
+    image_snapshot(image, "tests/snapshots/test_twitter_meme.png", threshold=0.1)
 
 
 @respx.mock
-def test_logo_meme_snapshot():
-    """Test logo meme generation with external PNG snapshot."""
+def test_logo_meme_snapshot(image_snapshot):
+    """Test logo meme generation with visual snapshot."""
     # Mock Logo API response
     logo_api_response = [
         {
@@ -107,12 +106,13 @@ def test_logo_meme_snapshot():
     assert response.status_code == 200
     assert response.headers["content-type"] == "image/png"
 
-    # Store the generated meme as an external PNG snapshot
-    assert response.content == external("uuid:e65f8727-b1d2-4521-9950-3985d02d9a8c.png")
+    # Store the generated meme as a visual snapshot
+    image = Image.open(BytesIO(response.content))
+    image_snapshot(image, "tests/snapshots/test_logo_meme.png", threshold=0.1)
 
 
 @respx.mock
-def test_meme_with_large_image_snapshot():
+def test_meme_with_large_image_snapshot(image_snapshot):
     """Test meme generation with a large image that gets resized."""
     # Create a large test image
     test_img = create_test_image(800, 600, (255, 100, 50))
@@ -127,9 +127,9 @@ def test_meme_with_large_image_snapshot():
     assert response.status_code == 200
 
     # Verify the resized meme matches the snapshot
-    assert response.content == external("uuid:7085fd54-e1d9-4855-9ba9-9c3d71225a25.png")
+    image = Image.open(BytesIO(response.content))
+    image_snapshot(image, "tests/snapshots/test_large_image_meme.png", threshold=0.1)
 
     # Verify it's a valid PNG with expected properties
-    img = Image.open(BytesIO(response.content))
-    assert img.format == snapshot("PNG")
-    assert img.mode == snapshot("RGBA")
+    assert image.format == "PNG"
+    assert image.mode == "RGBA"
