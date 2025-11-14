@@ -6,7 +6,7 @@ import respx
 from inline_snapshot import snapshot
 from PIL import Image
 
-from main import HAS_CAIRO, download_image, is_svg_url
+from app.services.image_downloader import HAS_CAIRO, download_image, is_svg_url
 
 
 def test_is_svg_url():

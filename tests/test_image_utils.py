@@ -1,7 +1,7 @@
 from inline_snapshot import snapshot
 from PIL import Image
 
-from main import resize_image, trim_image
+from app.utils.image import resize_image, trim_image
 
 
 def test_resize_image_larger_than_max():

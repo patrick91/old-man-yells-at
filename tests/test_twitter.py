@@ -3,7 +3,7 @@ import pytest
 import respx
 from inline_snapshot import snapshot
 
-from main import get_twitter_avatar, is_twitter_username
+from app.services.twitter import get_twitter_avatar, is_twitter_username
 
 
 def test_is_twitter_username():
