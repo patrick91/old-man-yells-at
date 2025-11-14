@@ -5,8 +5,6 @@ import hmac
 import time
 
 from fastapi import APIRouter, HTTPException, Request
-from slack_sdk import WebClient
-from slack_sdk.errors import SlackApiError
 
 from app import config
 from app.services.meme_generator import generate_meme
@@ -86,37 +84,14 @@ async def old_man_yells_at(request: Request):
             image_url = await search_logo(target)
 
         # Generate the meme
-        meme_bytes = await generate_meme(image_url)
+        await generate_meme(image_url)
 
-        # Upload to Slack if we have a bot token
-        if config.SLACK_BOT_TOKEN:
-            client = WebClient(token=config.SLACK_BOT_TOKEN)
-
-            # Upload the file
-            client.files_upload_v2(
-                file=meme_bytes,
-                filename=f"old-man-yells-at-{target.replace('@', '')}.png",
-                title=f"Old Man Yells At {target}",
-                initial_comment=f"Here's your meme for {target}! 👴☁️",
-            )
-
-            # Return success message
-            return {
-                "response_type": "in_channel",
-                "text": f"Generated meme for {target}!",
-            }
-        else:
-            # If no bot token, just return a message
-            return {
-                "response_type": "ephemeral",
-                "text": f"Meme generated for {target}! (Configure SLACK_BOT_TOKEN to upload images)",
-            }
-
-    except SlackApiError as e:
+        # Return success message
         return {
             "response_type": "ephemeral",
-            "text": f"Failed to upload to Slack: {e.response['error']}",
+            "text": f"✅ Meme generated for {target}!",
         }
+
     except HTTPException as e:
         return {
             "response_type": "ephemeral",

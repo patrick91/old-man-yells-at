@@ -7,7 +7,6 @@ LOGO_API_TOKEN = os.getenv("LOGO_API_TOKEN", "REDACTED_TOKEN")
 
 # Slack configuration
 SLACK_SIGNING_SECRET = os.getenv("SLACK_SIGNING_SECRET")
-SLACK_BOT_TOKEN = os.getenv("SLACK_BOT_TOKEN")
 
 # Template configuration
 TEMPLATE_PATH = os.path.join("assets", "template.png")

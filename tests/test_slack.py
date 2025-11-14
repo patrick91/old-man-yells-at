@@ -44,7 +44,10 @@ def create_slack_signature(data: dict, timestamp: str, secret: str) -> str:
 def test_slack_command_without_text():
     """Test slash command without any text argument."""
     timestamp = str(int(time.time()))
-    data = {"text": "", "response_url": "https://hooks.slack.com/commands/123"}
+    data = {
+        "text": "",
+        "response_url": "https://hooks.slack.com/commands/123",
+    }
     secret = "test-secret"
     signature = create_slack_signature(data, timestamp, secret)
 
@@ -93,10 +96,7 @@ def test_slack_command_with_twitter_username():
     secret = "test-secret"
     signature = create_slack_signature(data, timestamp, secret)
 
-    with (
-        patch("app.config.SLACK_SIGNING_SECRET", secret),
-        patch("app.config.SLACK_BOT_TOKEN", None),
-    ):
+    with patch("app.config.SLACK_SIGNING_SECRET", secret):
         response = client.post(
             "/slack/commands/old-man-yells-at",
             data=data,
@@ -142,10 +142,7 @@ def test_slack_command_with_company_domain():
     secret = "test-secret"
     signature = create_slack_signature(data, timestamp, secret)
 
-    with (
-        patch("app.config.SLACK_SIGNING_SECRET", secret),
-        patch("app.config.SLACK_BOT_TOKEN", None),
-    ):
+    with patch("app.config.SLACK_SIGNING_SECRET", secret):
         response = client.post(
             "/slack/commands/old-man-yells-at",
             data=data,
