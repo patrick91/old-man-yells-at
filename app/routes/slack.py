@@ -56,11 +56,12 @@ async def generate_and_send_meme(target: str, response_url: str, base_url: str):
         # Create URL for the generated meme
         meme_url = f"{base_url}/generate-meme?image_url={quote(image_url)}"
 
-        # Send ephemeral preview with "Post to Channel" button
+        # Replace the "Yelling at..." message with ephemeral preview and button
         async with httpx.AsyncClient() as client:
             await client.post(
                 response_url,
                 json={
+                    "replace_original": True,
                     "response_type": "ephemeral",
                     "blocks": [
                         {
@@ -148,7 +149,7 @@ async def old_man_yells_at(request: Request, background_tasks: BackgroundTasks):
     # Return immediate response (Slack requires response within 3 seconds)
     return {
         "response_type": "ephemeral",
-        "text": f"🎨 Generating meme for {target}...",
+        "text": f"👴 Yelling at {target}...",
     }
 
 
@@ -188,12 +189,13 @@ async def handle_interactivity(request: Request):
             meme_url = action["value"]
             response_url = payload["response_url"]
 
+            # Per Slack docs: "If you include a new message payload and delete_original,
+            # the source message will be deleted, and your new message published."
             async with httpx.AsyncClient() as client:
-                # Post to channel (replace original message with public post)
                 await client.post(
                     response_url,
                     json={
-                        "replace_original": True,
+                        "delete_original": True,
                         "response_type": "in_channel",
                         "blocks": [
                             {
