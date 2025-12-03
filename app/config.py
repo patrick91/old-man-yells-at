@@ -3,7 +3,7 @@
 import os
 
 # Logo API configuration
-LOGO_API_TOKEN = os.getenv("LOGO_API_TOKEN", "REDACTED_TOKEN")
+LOGO_API_TOKEN = os.getenv("LOGO_API_TOKEN", "")
 
 # Slack configuration
 SLACK_SIGNING_SECRET = os.getenv("SLACK_SIGNING_SECRET")

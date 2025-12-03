@@ -9,3 +9,7 @@ wheels/
 # Virtual environments
 .venv
 .fastapi
+
+# Environment files
+.env
+.env.*
