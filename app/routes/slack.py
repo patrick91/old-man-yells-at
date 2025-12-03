@@ -35,7 +35,7 @@ def verify_slack_request(
     return hmac.compare_digest(my_signature, signature)
 
 
-async def generate_and_send_meme(target: str, response_url: str, base_url: str):
+async def generate_and_send_meme(target: str, response_url: str, base_url: str) -> None:
     """Background task to generate meme and send ephemeral preview with button."""
     try:
         # Import here to avoid circular dependency
@@ -57,12 +57,11 @@ async def generate_and_send_meme(target: str, response_url: str, base_url: str):
         meme_url = f"{base_url}/generate-meme?image_url={quote(image_url)}"
 
         # Replace the "Yelling at..." message with ephemeral preview and button
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=30.0) as client:
             await client.post(
                 response_url,
                 json={
                     "replace_original": True,
-                    "response_type": "ephemeral",
                     "blocks": [
                         {
                             "type": "image",
@@ -90,7 +89,7 @@ async def generate_and_send_meme(target: str, response_url: str, base_url: str):
 
     except Exception as e:
         # Send error message back to Slack
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=30.0) as client:
             await client.post(
                 response_url,
                 json={
@@ -191,7 +190,7 @@ async def handle_interactivity(request: Request):
 
             # Per Slack docs: "If you include a new message payload and delete_original,
             # the source message will be deleted, and your new message published."
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(timeout=30.0) as client:
                 await client.post(
                     response_url,
                     json={
@@ -202,7 +201,16 @@ async def handle_interactivity(request: Request):
                                 "type": "image",
                                 "image_url": meme_url,
                                 "alt_text": "Old Man Yells At Cloud",
-                            }
+                            },
+                            {
+                                "type": "context",
+                                "elements": [
+                                    {
+                                        "type": "mrkdwn",
+                                        "text": "Posted using /old-man-yells-at",
+                                    }
+                                ],
+                            },
                         ],
                     },
                 )

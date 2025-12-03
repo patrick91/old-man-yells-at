@@ -29,7 +29,8 @@ async def search_logo(query: str) -> str:
         response = await client.get(
             "https://api.logo.dev/search",
             params={"q": query},
-            headers={"Authorization": f"Bearer: {LOGO_API_TOKEN}"},
+            headers={"Authorization": f"Bearer {LOGO_API_TOKEN}"},
+            timeout=30.0,
         )
         response.raise_for_status()
         logos = response.json()

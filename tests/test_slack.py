@@ -113,7 +113,7 @@ def test_slack_command_with_twitter_username():
 
     assert response.status_code == 200
     json_response = response.json()
-    assert "Generating meme" in json_response["text"]
+    assert "Yelling at @patrick91" in json_response["text"]
     assert json_response["response_type"] == "ephemeral"
 
 

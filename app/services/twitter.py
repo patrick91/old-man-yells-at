@@ -28,7 +28,7 @@ async def get_twitter_avatar(username: str) -> str:
     username = username.lstrip("@")
 
     # Fetch the Twitter profile page with a bot user agent
-    async with httpx.AsyncClient(follow_redirects=True) as client:
+    async with httpx.AsyncClient(follow_redirects=True, timeout=30.0) as client:
         response = await client.get(
             f"https://x.com/{username}",
             headers={
