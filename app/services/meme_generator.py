@@ -30,12 +30,24 @@ async def generate_meme(image_url: str) -> bytes:
     Returns:
         The generated meme as PNG bytes
     """
+    input_image = await download_image(image_url)
+    return compose_meme(input_image)
+
+
+def compose_meme(input_image: Image.Image) -> bytes:
+    """
+    Combine the template with an already-loaded image and return PNG bytes.
+
+    Args:
+        input_image: The image to place into the old man's line of fire
+
+    Returns:
+        The generated meme as PNG bytes
+    """
     left_anchor = DEFAULT_LEFT_ANCHOR
     top_anchor = DEFAULT_TOP_ANCHOR
     max_width = DEFAULT_MAX_WIDTH
     max_height = DEFAULT_MAX_HEIGHT
-
-    input_image = await download_image(image_url)
 
     trimmed_image = trim_image(input_image)
     resized_image = resize_image(trimmed_image, max_width, max_height)

@@ -47,6 +47,47 @@ def test_generate_meme_endpoint():
 
 
 @respx.mock
+def test_generate_x_meme():
+    """Test the /x/{handle} endpoint pulls an X profile photo."""
+    avatar = create_test_image(200, 200, (29, 161, 242))
+
+    respx.get("https://x.com/elonmusk").mock(
+        return_value=httpx.Response(
+            200,
+            text=(
+                '<meta property="og:image" '
+                'content="https://pbs.twimg.com/profile_images/elon_400x400.jpg">'
+            ),
+        )
+    )
+    respx.get("https://pbs.twimg.com/profile_images/elon_400x400.jpg").mock(
+        return_value=httpx.Response(200, content=avatar)
+    )
+
+    response = client.get("/x/elonmusk")
+
+    assert response.status_code == snapshot(200)
+    assert response.headers["content-type"] == snapshot("image/png")
+    assert "old-man-yells-at-elonmusk.png" in response.headers["content-disposition"]
+
+
+@respx.mock
+def test_generate_github_meme():
+    """Test the /gh/{handle} endpoint pulls a GitHub avatar."""
+    avatar = create_test_image(200, 200, (20, 20, 20))
+
+    respx.get("https://github.com/torvalds.png?size=460").mock(
+        return_value=httpx.Response(200, content=avatar)
+    )
+
+    response = client.get("/gh/torvalds")
+
+    assert response.status_code == snapshot(200)
+    assert response.headers["content-type"] == snapshot("image/png")
+    assert "old-man-yells-at-torvalds.png" in response.headers["content-disposition"]
+
+
+@respx.mock
 def test_generate_logo_meme_invalid_search():
     """Test Logo API with special characters."""
     logo_api_response = []

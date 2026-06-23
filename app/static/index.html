@@ -1,0 +1,832 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Old Man Yells At — instant Grampa Simpson memes</title>
+    <meta
+      name="description"
+      content="Type any company domain or @handle and watch a furious old man yell at their logo. Free, instant, and available as an API."
+    />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://rsms.me/" />
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Tailwind v4 (browser build) -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style type="text/tailwindcss">
+      @import "tailwindcss";
+
+      @theme {
+        --font-sans: "InterVariable", ui-sans-serif, system-ui, sans-serif;
+        --font-sans--font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+        --font-display: "Oswald", ui-sans-serif, system-ui, sans-serif;
+        --font-mono: "Geist Mono", ui-monospace, monospace;
+        --color-paper: oklch(0.991 0.012 95);
+
+        --animate-ticker: ticker 12s ease-in-out infinite;
+      }
+
+      /* Vertical ticker: hold each line, then slide up to the next (1lh per step). */
+      @keyframes ticker {
+        0%,
+        16% {
+          transform: translateY(0);
+        }
+        20%,
+        36% {
+          transform: translateY(-1lh);
+        }
+        40%,
+        56% {
+          transform: translateY(-2lh);
+        }
+        60%,
+        76% {
+          transform: translateY(-3lh);
+        }
+        80%,
+        96% {
+          transform: translateY(-4lh);
+        }
+        100% {
+          transform: translateY(-5lh);
+        }
+      }
+
+      /* Highlighter marker behind display words */
+      @utility marker {
+        background-image: linear-gradient(
+          transparent 12%,
+          var(--color-amber-300) 12%,
+          var(--color-amber-300) 90%,
+          transparent 90%
+        );
+        -webkit-box-decoration-break: clone;
+        box-decoration-break: clone;
+      }
+    </style>
+  </head>
+
+  <body class="bg-paper font-sans text-neutral-900 antialiased">
+    <!-- Header -->
+    <header
+      class="sticky top-0 z-40 border-b border-neutral-900/5 bg-paper/80 backdrop-blur-md"
+    >
+      <div
+        class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4 lg:px-8"
+      >
+        <a
+          href="/"
+          aria-label="Homepage"
+          class="flex items-center gap-2 font-display text-lg font-semibold"
+        >
+          <img src="/logo.png" alt="" class="h-10 w-auto shrink-0" />
+          <span class="tracking-wide text-neutral-900 uppercase"
+            >Old man yells at</span
+          >
+        </a>
+
+        <nav class="flex items-center gap-1 sm:gap-2">
+          <div
+            class="flex items-center gap-1 text-sm font-medium max-sm:hidden"
+          >
+            <a
+              href="#examples"
+              class="rounded-lg px-3 py-2 text-neutral-600 hover:text-neutral-950"
+              >Examples</a
+            >
+            <a
+              href="#how"
+              class="rounded-lg px-3 py-2 text-neutral-600 hover:text-neutral-950"
+              >How it works</a
+            >
+            <a
+              href="#api"
+              class="rounded-lg px-3 py-2 text-neutral-600 hover:text-neutral-950"
+              >API</a
+            >
+          </div>
+          <a
+            href="https://github.com/patrick91/old-man-yells-at"
+            target="_blank"
+            rel="noopener"
+            class="inline-flex items-center gap-2 rounded-xl bg-white py-2 pr-3 pl-2.5 text-sm font-medium text-neutral-900 ring-1 ring-neutral-900/10 hover:bg-neutral-50"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              class="size-4 shrink-0 fill-neutral-900"
+              aria-hidden="true"
+            >
+              <path
+                d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
+              />
+            </svg>
+            <span class="max-sm:hidden">GitHub</span>
+          </a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="isolate">
+      <!-- Hero -->
+      <section id="top" class="relative scroll-mt-24 overflow-hidden">
+        <div
+          aria-hidden="true"
+          class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[520px] bg-[radial-gradient(60%_60%_at_50%_-10%,var(--color-amber-200)_0%,transparent_70%)] opacity-70"
+        ></div>
+
+        <div
+          class="mx-auto max-w-6xl px-6 pt-16 pb-20 text-center sm:pt-24 lg:px-8"
+        >
+          <p
+            class="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm font-medium text-neutral-700 ring-1 ring-neutral-900/10"
+          >
+            <span class="size-1.5 shrink-0 rounded-full bg-amber-500"></span>
+            Yes, it's the Simpsons meme
+          </p>
+
+          <h1
+            class="mx-auto mt-6 max-w-[14ch] font-display text-5xl font-semibold text-balance text-neutral-950 uppercase sm:text-7xl lg:text-8xl"
+          >
+            Old man yells at <span class="marker px-1">literally anyone</span>
+          </h1>
+
+          <p
+            class="mx-auto mt-6 max-w-[44ch] text-lg text-pretty text-neutral-600 sm:text-xl"
+          >
+            Type a company domain or an @handle. Grampa does the furious part.
+          </p>
+
+          <!-- Generator -->
+          <form
+            id="yell-form"
+            class="mx-auto mt-8 flex max-w-xl items-center gap-2 rounded-2xl bg-white p-2 shadow-sm ring-1 ring-neutral-900/10 focus-within:ring-2 focus-within:ring-neutral-900"
+          >
+            <label for="target" class="sr-only">Company domain or @handle</label>
+            <input
+              id="target"
+              name="target"
+              type="text"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+              placeholder="fastapi or stripe.com"
+              class="min-w-0 grow bg-transparent px-3 text-base text-neutral-900 placeholder:text-neutral-400 focus:outline-none"
+            />
+            <button
+              type="submit"
+              class="shrink-0 rounded-xl bg-neutral-900 px-4 py-2.5 text-base font-medium text-white shadow-sm hover:bg-neutral-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
+            >
+              Yell at it
+            </button>
+          </form>
+
+          <div
+            class="mx-auto mt-4 flex flex-wrap items-center justify-center gap-2 text-sm"
+          >
+            <span class="text-neutral-500">Try</span>
+            <button
+              type="button"
+              data-target="fastapi"
+              class="rounded-full bg-white px-3 py-1 font-medium text-neutral-700 ring-1 ring-neutral-900/10 hover:bg-neutral-50"
+            >
+              fastapi
+            </button>
+            <button
+              type="button"
+              data-target="github.com"
+              class="rounded-full bg-white px-3 py-1 font-medium text-neutral-700 ring-1 ring-neutral-900/10 hover:bg-neutral-50"
+            >
+              github.com
+            </button>
+          </div>
+
+          <!-- Live preview -->
+          <figure class="mx-auto mt-12 max-w-md">
+            <div
+              class="relative min-h-72 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-neutral-900/10"
+            >
+              <img
+                id="meme"
+                src="/fastapi"
+                alt="An old man yelling at the chosen logo"
+                class="block w-full opacity-0 transition-opacity duration-300"
+                onerror="memeError(this)"
+                onload="memeLoaded(this)"
+              />
+              <div
+                id="meme-loading"
+                class="absolute inset-0 grid place-items-center"
+              >
+                <div
+                  class="size-8 animate-spin rounded-full border-2 border-neutral-200 border-t-neutral-900"
+                  aria-hidden="true"
+                ></div>
+                <span class="sr-only">Generating meme</span>
+              </div>
+              <div
+                id="meme-error"
+                class="absolute inset-0 hidden flex-col items-center justify-center gap-2 p-6 text-center"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke-width="1.5"
+                  class="size-9 shrink-0 stroke-neutral-300"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M15.182 16.318A4.486 4.486 0 0 0 12.016 15a4.486 4.486 0 0 0-3.198 1.318M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z"
+                  />
+                </svg>
+                <p class="text-base font-medium text-neutral-700">
+                  Nothing to yell at
+                </p>
+                <p class="max-w-[28ch] text-sm text-pretty text-neutral-500">
+                  Couldn't find that one. Try a real domain like stripe.com or an
+                  @handle.
+                </p>
+              </div>
+            </div>
+            <figcaption
+              class="mt-3 font-display text-sm font-medium tracking-wide text-neutral-500 uppercase"
+            >
+              Old man yells at <span id="caption">fastapi</span>
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <!-- Examples -->
+      <section
+        id="examples"
+        class="scroll-mt-24 border-t border-neutral-900/5 py-20 sm:py-28"
+      >
+        <div class="mx-auto max-w-6xl px-6 lg:px-8">
+          <div>
+            <p
+              class="font-mono text-sm tracking-wide text-amber-600 uppercase"
+            >
+              Greatest hits
+            </p>
+            <h2
+              class="mt-3 max-w-[18ch] font-display text-4xl font-semibold text-balance text-neutral-950 uppercase sm:text-5xl"
+            >
+              A wall of righteous fury
+            </h2>
+            <p class="mt-4 max-w-[52ch] text-lg text-pretty text-neutral-600">
+              Tap any one to load it into the generator above and make it your
+              own.
+            </p>
+          </div>
+
+          <ul
+            role="list"
+            class="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3"
+          >
+            <!-- card -->
+            <li>
+              <button
+                type="button"
+                data-target="fastapi"
+                class="group w-full rounded-2xl bg-white p-3 text-left ring-1 ring-neutral-900/10 transition-transform hover:-translate-y-0.5 hover:ring-neutral-900/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
+              >
+                <div
+                  class="relative aspect-square overflow-hidden rounded-xl bg-neutral-50"
+                >
+                  <img
+                    src="/fastapi"
+                    loading="lazy"
+                    alt="Old man yells at FastAPI"
+                    onerror="cardError(this)"
+                    class="size-full object-contain p-6 transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <div
+                    class="card-fallback absolute inset-0 hidden flex-col items-center justify-center gap-1 p-4 text-center"
+                  >
+                    <p class="font-display text-2xl font-semibold text-neutral-300 uppercase">FastAPI</p>
+                    <p class="text-sm text-neutral-400">Run the server to load</p>
+                  </div>
+                </div>
+                <div class="mt-3 flex items-baseline justify-between gap-2">
+                  <p class="text-base font-medium text-neutral-900">FastAPI</p>
+                  <p class="text-sm text-neutral-500">fastapi</p>
+                </div>
+              </button>
+            </li>
+
+            <li>
+              <button
+                type="button"
+                data-target="github.com"
+                class="group w-full rounded-2xl bg-white p-3 text-left ring-1 ring-neutral-900/10 transition-transform hover:-translate-y-0.5 hover:ring-neutral-900/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
+              >
+                <div
+                  class="relative aspect-square overflow-hidden rounded-xl bg-neutral-50"
+                >
+                  <img
+                    src="/github.com"
+                    loading="lazy"
+                    alt="Old man yells at GitHub"
+                    onerror="cardError(this)"
+                    class="size-full object-contain p-6 transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <div
+                    class="card-fallback absolute inset-0 hidden flex-col items-center justify-center gap-1 p-4 text-center"
+                  >
+                    <p class="font-display text-2xl font-semibold text-neutral-300 uppercase">GitHub</p>
+                    <p class="text-sm text-neutral-400">Run the server to load</p>
+                  </div>
+                </div>
+                <div class="mt-3 flex items-baseline justify-between gap-2">
+                  <p class="text-base font-medium text-neutral-900">GitHub</p>
+                  <p class="text-sm text-neutral-500">github.com</p>
+                </div>
+              </button>
+            </li>
+
+            <li>
+              <button
+                type="button"
+                data-target="stripe.com"
+                class="group w-full rounded-2xl bg-white p-3 text-left ring-1 ring-neutral-900/10 transition-transform hover:-translate-y-0.5 hover:ring-neutral-900/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
+              >
+                <div
+                  class="relative aspect-square overflow-hidden rounded-xl bg-neutral-50"
+                >
+                  <img
+                    src="/stripe.com"
+                    loading="lazy"
+                    alt="Old man yells at Stripe"
+                    onerror="cardError(this)"
+                    class="size-full object-contain p-6 transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <div
+                    class="card-fallback absolute inset-0 hidden flex-col items-center justify-center gap-1 p-4 text-center"
+                  >
+                    <p class="font-display text-2xl font-semibold text-neutral-300 uppercase">Stripe</p>
+                    <p class="text-sm text-neutral-400">Run the server to load</p>
+                  </div>
+                </div>
+                <div class="mt-3 flex items-baseline justify-between gap-2">
+                  <p class="text-base font-medium text-neutral-900">Stripe</p>
+                  <p class="text-sm text-neutral-500">stripe.com</p>
+                </div>
+              </button>
+            </li>
+
+            <li>
+              <button
+                type="button"
+                data-target="openai"
+                class="group w-full rounded-2xl bg-white p-3 text-left ring-1 ring-neutral-900/10 transition-transform hover:-translate-y-0.5 hover:ring-neutral-900/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
+              >
+                <div
+                  class="relative aspect-square overflow-hidden rounded-xl bg-neutral-50"
+                >
+                  <img
+                    src="/openai"
+                    loading="lazy"
+                    alt="Old man yells at OpenAI"
+                    onerror="cardError(this)"
+                    class="size-full object-contain p-6 transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <div
+                    class="card-fallback absolute inset-0 hidden flex-col items-center justify-center gap-1 p-4 text-center"
+                  >
+                    <p class="font-display text-2xl font-semibold text-neutral-300 uppercase">OpenAI</p>
+                    <p class="text-sm text-neutral-400">Run the server to load</p>
+                  </div>
+                </div>
+                <div class="mt-3 flex items-baseline justify-between gap-2">
+                  <p class="text-base font-medium text-neutral-900">OpenAI</p>
+                  <p class="text-sm text-neutral-500">openai</p>
+                </div>
+              </button>
+            </li>
+
+            <li>
+              <button
+                type="button"
+                data-target="apple.com"
+                class="group w-full rounded-2xl bg-white p-3 text-left ring-1 ring-neutral-900/10 transition-transform hover:-translate-y-0.5 hover:ring-neutral-900/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
+              >
+                <div
+                  class="relative aspect-square overflow-hidden rounded-xl bg-neutral-50"
+                >
+                  <img
+                    src="/apple.com"
+                    loading="lazy"
+                    alt="Old man yells at Apple"
+                    onerror="cardError(this)"
+                    class="size-full object-contain p-6 transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <div
+                    class="card-fallback absolute inset-0 hidden flex-col items-center justify-center gap-1 p-4 text-center"
+                  >
+                    <p class="font-display text-2xl font-semibold text-neutral-300 uppercase">Apple</p>
+                    <p class="text-sm text-neutral-400">Run the server to load</p>
+                  </div>
+                </div>
+                <div class="mt-3 flex items-baseline justify-between gap-2">
+                  <p class="text-base font-medium text-neutral-900">Apple</p>
+                  <p class="text-sm text-neutral-500">apple.com</p>
+                </div>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- How it works -->
+      <section
+        id="how"
+        class="scroll-mt-24 border-t border-neutral-900/5 py-20 sm:py-28"
+      >
+        <div class="mx-auto max-w-6xl px-6 lg:px-8">
+          <div>
+            <p class="font-mono text-sm tracking-wide text-amber-600 uppercase">
+              How it works
+            </p>
+            <h2
+              class="mt-3 max-w-[20ch] font-display text-4xl font-semibold text-balance text-neutral-950 uppercase sm:text-5xl"
+            >
+              Three steps to pure outrage
+            </h2>
+          </div>
+
+          <dl class="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-3">
+            <div>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke-width="1.5"
+                class="size-6 shrink-0 stroke-amber-500"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M16.5 12a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Zm0 0c0 1.657 1.007 3 2.25 3S21 13.657 21 12a9 9 0 1 0-2.636 6.364M16.5 12V8.25"
+                />
+              </svg>
+              <dt class="mt-4 text-lg font-medium text-neutral-900">
+                Type a target
+              </dt>
+              <dd class="mt-2 text-base/7 text-pretty text-neutral-600">
+                A company domain like stripe.com pulls their logo. An @handle
+                grabs that profile photo straight from X.
+              </dd>
+            </div>
+
+            <div>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke-width="1.5"
+                class="size-6 shrink-0 stroke-amber-500"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z"
+                />
+              </svg>
+              <dt class="mt-4 text-lg font-medium text-neutral-900">
+                Get an instant meme
+              </dt>
+              <dd class="mt-2 text-base/7 text-pretty text-neutral-600">
+                The logo is trimmed, scaled, and placed right in Grampa's line of
+                fire. Rendered fresh, no sign-up, no watermark.
+              </dd>
+            </div>
+
+            <div>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke-width="1.5"
+                class="size-6 shrink-0 stroke-amber-500"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"
+                />
+              </svg>
+              <dt class="mt-4 text-lg font-medium text-neutral-900">
+                Use it anywhere
+              </dt>
+              <dd class="mt-2 text-base/7 text-pretty text-neutral-600">
+                Every meme lives at its own URL. Hotlink it in a README, embed
+                it, or script it with the API.
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <!-- API / developers -->
+      <section
+        id="api"
+        class="scroll-mt-24 bg-neutral-950 py-20 text-neutral-100 sm:py-28"
+      >
+        <div class="mx-auto max-w-6xl px-6 lg:px-8">
+          <div class="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:items-center">
+            <div>
+              <p class="font-mono text-sm tracking-wide text-amber-400 uppercase">
+                For developers
+              </p>
+              <h2
+                class="mt-3 max-w-[16ch] font-display text-4xl font-semibold text-balance text-white uppercase sm:text-5xl"
+              >
+                A meme endpoint, not a meme site
+              </h2>
+              <p class="mt-6 max-w-[50ch] text-lg text-pretty text-neutral-300">
+                Every meme is a single GET request that streams back a PNG. No
+                keys, no JSON, no dashboard — just a URL you can drop anywhere.
+              </p>
+
+              <dl class="mt-8 space-y-5">
+                <div class="border-l-2 border-amber-400/60 pl-4">
+                  <dt class="font-mono text-base text-amber-300">GET /{domain}</dt>
+                  <dd class="mt-1 text-base/7 text-neutral-400">
+                    Yell at a company by domain — fetches and crops their logo.
+                  </dd>
+                </div>
+                <div class="border-l-2 border-amber-400/60 pl-4">
+                  <dt class="font-mono text-base text-amber-300">GET /x/{handle}</dt>
+                  <dd class="mt-1 text-base/7 text-neutral-400">
+                    Yell at an X user — pulls their profile photo.
+                  </dd>
+                </div>
+                <div class="border-l-2 border-amber-400/60 pl-4">
+                  <dt class="font-mono text-base text-amber-300">GET /gh/{handle}</dt>
+                  <dd class="mt-1 text-base/7 text-neutral-400">
+                    Yell at a GitHub user — pulls their avatar.
+                  </dd>
+                </div>
+              </dl>
+            </div>
+
+            <div class="space-y-4">
+              <div
+                class="overflow-hidden rounded-2xl bg-neutral-900 ring-1 ring-white/10"
+              >
+                <div
+                  class="flex items-center justify-between border-b border-white/10 px-4 py-2.5"
+                >
+                  <div class="flex items-center gap-2" aria-hidden="true">
+                    <span class="size-3 rounded-full bg-neutral-700"></span>
+                    <span class="size-3 rounded-full bg-neutral-700"></span>
+                    <span class="size-3 rounded-full bg-neutral-700"></span>
+                  </div>
+                  <button
+                    type="button"
+                    data-copy="#curl-code"
+                    class="rounded-lg px-2 py-1 text-sm font-medium text-neutral-300 ring-1 ring-white/10 hover:bg-white/5"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <pre
+                  class="overflow-x-auto px-4 py-4 text-sm/6 text-neutral-200"
+                ><code id="curl-code"><span class="text-neutral-500"># yell at a company</span>
+curl -O <span class="js-base">https://oldmanyells.at</span>/stripe.com
+
+<span class="text-neutral-500"># yell at an X user</span>
+curl -O <span class="js-base">https://oldmanyells.at</span>/x/elonmusk
+
+<span class="text-neutral-500"># yell at a GitHub user</span>
+curl -O <span class="js-base">https://oldmanyells.at</span>/gh/torvalds</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Final CTA -->
+      <section class="border-t border-neutral-900/5 py-20 sm:py-28">
+        <div class="mx-auto max-w-6xl px-6 text-center lg:px-8">
+          <h2
+            class="mx-auto max-w-[16ch] font-display text-4xl font-semibold text-balance text-neutral-950 uppercase sm:text-6xl"
+          >
+            Go on. Yell at something.
+          </h2>
+          <p
+            class="mx-auto mt-5 max-w-[44ch] text-lg text-pretty text-neutral-600"
+          >
+            It's free, it's instant, and the old man has plenty of energy left.
+          </p>
+          <button
+            id="cta-start"
+            type="button"
+            class="mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-3 text-base font-medium text-neutral-900 ring-1 ring-neutral-900/10 hover:bg-neutral-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
+          >
+            Start yelling
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke-width="1.5"
+              class="size-5 shrink-0 stroke-neutral-900"
+              aria-hidden="true"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M4.5 12h15m0 0-6.75-6.75M19.5 12l-6.75 6.75"
+              />
+            </svg>
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-neutral-900/5">
+      <div
+        class="mx-auto max-w-6xl border-b border-neutral-900/5 px-6 pt-12 pb-10 lg:px-8"
+      >
+        <p
+          aria-hidden="true"
+          class="flex flex-wrap items-center gap-x-3 font-display text-2xl tracking-wide text-neutral-950 uppercase sm:text-3xl"
+        >
+          <span>Old man yells at</span>
+          <span class="inline-block h-[1lh] overflow-hidden text-amber-500">
+            <span
+              class="block animate-ticker whitespace-nowrap motion-reduce:animate-none"
+            >
+              <span class="block">FastAPI</span>
+              <span class="block">OpenAI</span>
+              <span class="block">the cloud</span>
+              <span class="block">Kubernetes</span>
+              <span class="block">your manager</span>
+              <span class="block">FastAPI</span>
+            </span>
+          </span>
+        </p>
+      </div>
+      <div
+        class="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-12 sm:flex-row sm:items-center sm:justify-between lg:px-8"
+      >
+        <div>
+          <a
+            href="/"
+            aria-label="Homepage"
+            class="flex items-center gap-2 font-display text-base font-semibold"
+          >
+            <img src="/logo.png" alt="" class="h-7 w-auto shrink-0" />
+            <span class="tracking-wide text-neutral-900 uppercase"
+              >Old man yells at</span
+            >
+          </a>
+          <p class="mt-4 max-w-[52ch] text-sm text-pretty text-neutral-500">
+            A parody fan project. Not affiliated with The Simpsons, 20th
+            Television, or Disney.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-5 text-sm">
+          <a
+            href="#api"
+            class="font-normal text-neutral-600 hover:text-neutral-950"
+            >API</a
+          >
+          <a
+            href="https://github.com/patrick91/old-man-yells-at"
+            target="_blank"
+            rel="noopener"
+            class="text-neutral-600 hover:text-neutral-900"
+            aria-label="GitHub"
+          >
+            <svg viewBox="0 0 24 24" class="size-5 fill-current" aria-hidden="true">
+              <path
+                d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
+              />
+            </svg>
+          </a>
+          <a
+            href="https://en.wikipedia.org/wiki/Old_Man_Yells_at_Cloud"
+            target="_blank"
+            rel="noopener"
+            class="text-neutral-600 hover:text-neutral-900"
+            aria-label="The meme on Wikipedia"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              class="size-5 fill-current"
+              aria-hidden="true"
+            >
+              <path
+                d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+              />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      const form = document.getElementById("yell-form");
+      const input = document.getElementById("target");
+      const img = document.getElementById("meme");
+      const caption = document.getElementById("caption");
+      const loading = document.getElementById("meme-loading");
+      const errorBox = document.getElementById("meme-error");
+
+      function memeLoaded() {
+        loading.classList.add("hidden");
+        errorBox.classList.add("hidden");
+        img.classList.remove("opacity-0");
+      }
+
+      function memeError() {
+        loading.classList.add("hidden");
+        img.classList.add("opacity-0");
+        errorBox.classList.remove("hidden");
+        errorBox.classList.add("flex");
+      }
+
+      function cardError(el) {
+        el.classList.add("hidden");
+        const fallback = el.parentElement.querySelector(".card-fallback");
+        if (fallback) {
+          fallback.classList.remove("hidden");
+          fallback.classList.add("flex");
+        }
+      }
+
+      function yellAt(value) {
+        const v = (value || "").trim();
+        if (!v) {
+          input.focus();
+          return;
+        }
+        input.value = v;
+        caption.textContent = v;
+        errorBox.classList.add("hidden");
+        errorBox.classList.remove("flex");
+        loading.classList.remove("hidden");
+        img.classList.add("opacity-0");
+        img.src = "/" + encodeURIComponent(v);
+      }
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        yellAt(input.value);
+      });
+
+      document.querySelectorAll("[data-target]").forEach((el) => {
+        el.addEventListener("click", () => {
+          yellAt(el.getAttribute("data-target"));
+          document
+            .getElementById("top")
+            .scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      });
+
+      document.getElementById("cta-start").addEventListener("click", () => {
+        document
+          .getElementById("top")
+          .scrollIntoView({ behavior: "smooth", block: "start" });
+        setTimeout(() => input.focus(), 350);
+      });
+
+      document.querySelectorAll("[data-copy]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const node = document.querySelector(btn.getAttribute("data-copy"));
+          if (!node) return;
+          try {
+            await navigator.clipboard.writeText(node.innerText);
+            const original = btn.textContent;
+            btn.textContent = "Copied";
+            setTimeout(() => (btn.textContent = original), 1500);
+          } catch (e) {
+            /* clipboard unavailable */
+          }
+        });
+      });
+
+      // Make the code samples reflect the real host the page is served from.
+      if (location.origin && location.origin.startsWith("http")) {
+        document
+          .querySelectorAll(".js-base")
+          .forEach((el) => (el.textContent = location.origin));
+      }
+    </script>
+  </body>
+</html>
