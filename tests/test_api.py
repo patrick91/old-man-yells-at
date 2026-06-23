@@ -11,6 +11,24 @@ from app.main import app
 client = TestClient(app)
 
 
+def test_landing_page():
+    """Test the landing page route."""
+    response = client.get("/")
+
+    assert response.status_code == snapshot(200)
+    assert response.headers["content-type"] == snapshot("text/html; charset=utf-8")
+    assert "Old Man Yells At" in response.text
+    assert "/static/landing.css" in response.text
+    assert "/assets/template.png" in response.text
+
+
+def test_favicon_does_not_hit_meme_route():
+    """Test browser favicon requests do not route through logo lookup."""
+    response = client.get("/favicon.ico")
+
+    assert response.status_code == snapshot(204)
+
+
 def create_test_image(width: int = 100, height: int = 100, color=(255, 0, 0)) -> bytes:
     """Helper to create a test image as bytes."""
     img = Image.new("RGB", (width, height), color)
