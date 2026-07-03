@@ -38,7 +38,7 @@ def test_generate_meme_endpoint():
 
     assert response.status_code == snapshot(200)
     assert response.headers["content-type"] == snapshot("image/png")
-    assert "test-meme.png" in response.headers["content-disposition"]
+    assert "old-man-yells-at-test-meme.png" in response.headers["content-disposition"]
 
     # Verify it's a valid PNG
     img = Image.open(BytesIO(response.content))
@@ -85,6 +85,32 @@ def test_generate_github_meme():
     assert response.status_code == snapshot(200)
     assert response.headers["content-type"] == snapshot("image/png")
     assert "old-man-yells-at-torvalds.png" in response.headers["content-disposition"]
+
+
+@respx.mock
+def test_generate_logo_meme_filename():
+    """Test the /{search} endpoint uses the standard save filename."""
+    logo_api_response = [
+        {
+            "name": "Python",
+            "domain": "python.org",
+            "logo_url": "https://logo.dev/python",
+        }
+    ]
+    test_logo = create_test_image(300, 300, (50, 100, 200))
+
+    respx.get("https://api.logo.dev/search").mock(
+        return_value=httpx.Response(200, json=logo_api_response)
+    )
+    respx.get("https://logo.dev/python&format=png").mock(
+        return_value=httpx.Response(200, content=test_logo)
+    )
+
+    response = client.get("/python.org")
+
+    assert response.status_code == snapshot(200)
+    assert response.headers["content-type"] == snapshot("image/png")
+    assert "old-man-yells-at-python.org.png" in response.headers["content-disposition"]
 
 
 @respx.mock
