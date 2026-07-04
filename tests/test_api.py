@@ -1,4 +1,5 @@
 from io import BytesIO
+from urllib.parse import quote
 
 import httpx
 import respx
@@ -20,18 +21,16 @@ def create_test_image(width: int = 100, height: int = 100, color=(255, 0, 0)) ->
 
 
 @respx.mock
-def test_generate_meme_endpoint():
-    """Test the /generate-meme endpoint."""
+def test_generate_image_meme_endpoint():
+    """Test the /img/{image_url} endpoint."""
     # Mock image download
     test_img = create_test_image(200, 200, (0, 255, 0))
-    respx.get("https://example.com/test-logo.png").mock(
-        return_value=httpx.Response(200, content=test_img)
-    )
+    image_url = "https://example.com/test-logo.png?token=abc&format=png"
+    respx.get(image_url).mock(return_value=httpx.Response(200, content=test_img))
 
     response = client.get(
-        "/generate-meme",
+        f"/img/{quote(image_url, safe='')}",
         params={
-            "image_url": "https://example.com/test-logo.png",
             "filename": "test-meme.png",
         },
     )
@@ -44,6 +43,57 @@ def test_generate_meme_endpoint():
     img = Image.open(BytesIO(response.content))
     assert img.format == snapshot("PNG")
     assert img.mode == snapshot("RGBA")
+
+
+@respx.mock
+def test_generate_logo_meme_uses_logo_dev_for_bare_search():
+    """Test the /{search} endpoint treats bare words as logo searches."""
+    logo_api_response = [
+        {
+            "name": "FastAPI",
+            "domain": "fastapi.tiangolo.com",
+            "logo_url": "https://logo.dev/fastapi",
+        }
+    ]
+    test_logo = create_test_image(300, 300, (0, 150, 120))
+
+    respx.get("https://api.logo.dev/search").mock(
+        return_value=httpx.Response(200, json=logo_api_response)
+    )
+    respx.get("https://logo.dev/fastapi?format=png").mock(
+        return_value=httpx.Response(200, content=test_logo)
+    )
+
+    response = client.get("/fastapi")
+
+    assert response.status_code == snapshot(200)
+    assert response.headers["content-type"] == snapshot("image/png")
+    assert "old-man-yells-at-fastapi.png" in response.headers["content-disposition"]
+
+
+@respx.mock
+def test_probe_paths_do_not_call_logo_dev():
+    """Test common scanner/probe paths are rejected before Logo.dev lookup."""
+    logo_api_route = respx.get("https://api.logo.dev/search").mock(
+        return_value=httpx.Response(200, json=[])
+    )
+
+    for path in (
+        "/admin",
+        "/api",
+        "/wp-admin",
+        "/wp-login.php",
+        "/wplogin.php",
+        "/xmlrpc.php",
+        "/.env",
+        "/favicon.ico",
+        "/robots.txt",
+        "/server-status",
+    ):
+        response = client.get(path)
+        assert response.status_code == 404
+
+    assert not logo_api_route.called
 
 
 @respx.mock
@@ -102,7 +152,7 @@ def test_generate_logo_meme_filename():
     respx.get("https://api.logo.dev/search").mock(
         return_value=httpx.Response(200, json=logo_api_response)
     )
-    respx.get("https://logo.dev/python&format=png").mock(
+    respx.get("https://logo.dev/python?format=png").mock(
         return_value=httpx.Response(200, content=test_logo)
     )
 

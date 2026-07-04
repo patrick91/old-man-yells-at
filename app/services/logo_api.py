@@ -1,9 +1,19 @@
 """Logo API integration service."""
 
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+
 import httpx
 from fastapi import HTTPException
 
 from app.config import LOGO_API_TOKEN
+
+
+def _force_png_logo_url(logo_url: str) -> str:
+    """Return a Logo.dev image URL with PNG output requested."""
+    parts = urlsplit(logo_url)
+    query = dict(parse_qsl(parts.query, keep_blank_values=True))
+    query["format"] = "png"
+    return urlunsplit(parts._replace(query=urlencode(query)))
 
 
 async def search_logo(query: str) -> str:
@@ -40,5 +50,4 @@ async def search_logo(query: str) -> str:
                 status_code=404, detail="No logos found for the given search query"
             )
 
-        logo_url = logos[0]["logo_url"] + "&format=png"
-        return logo_url
+        return _force_png_logo_url(logos[0]["logo_url"])

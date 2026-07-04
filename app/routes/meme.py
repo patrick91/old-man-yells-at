@@ -2,14 +2,16 @@
 
 import re
 from pathlib import PurePath
+from urllib.parse import unquote, urlsplit
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 
 from app.services.github import github_avatar_url
 from app.services.logo_api import search_logo
 from app.services.meme_generator import generate_meme as generate_meme_bytes
-from app.services.twitter import get_twitter_avatar, is_twitter_username
+from app.services.search_filter import is_blocked_search
+from app.services.twitter import get_twitter_avatar
 
 router = APIRouter()
 
@@ -40,16 +42,25 @@ async def _stream_meme(image_url: str, filename: str = "meme.png") -> StreamingR
     )
 
 
-@router.get("/generate-meme")
-async def generate_meme(image_url: str, filename: str = "meme.png"):
+def _filename_from_image_url(image_url: str) -> str:
+    """Return a useful default download filename for an arbitrary image URL."""
+    parsed = urlsplit(image_url)
+    return PurePath(unquote(parsed.path)).name or parsed.netloc or "image"
+
+
+@router.get("/img/{image_url:path}")
+async def generate_image_meme(image_url: str, filename: str | None = None):
     """
     Generate a meme from an arbitrary image URL.
 
     Args:
-        image_url: URL of the image to use
+        image_url: URL-encoded image URL to use
         filename: Optional filename for the generated meme
     """
-    return await _stream_meme(image_url, filename)
+    decoded_image_url = unquote(image_url)
+    return await _stream_meme(
+        decoded_image_url, filename or _filename_from_image_url(decoded_image_url)
+    )
 
 
 @router.get("/x/{handle}")
@@ -81,17 +92,13 @@ async def generate_github_meme(handle: str):
 @router.get("/{search}")
 async def generate_logo_meme(search: str):
     """
-    Generate a meme from a company logo (Logo.dev) or an X/Twitter profile photo.
+    Generate a meme from a company logo using Logo.dev.
 
     Args:
-        search: A company domain (e.g. 'microsoft.com') or username (e.g. '@patrick91')
+        search: A company domain or brand name (e.g. 'microsoft.com')
     """
-    # Check if it's a Twitter/X username
-    if is_twitter_username(search):
-        username = search.lstrip("@")
-        image_url = await get_twitter_avatar(username)
-        return await _stream_meme(image_url, username)
+    if is_blocked_search(search):
+        raise HTTPException(status_code=404, detail="Not a supported meme target")
 
-    # Otherwise treat it as a company domain and use the Logo API
     logo_url = await search_logo(search)
     return await _stream_meme(logo_url, search)

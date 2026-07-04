@@ -10,6 +10,7 @@ from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 
 from app import config
 from app.services.meme_generator import generate_meme
+from app.services.search_filter import is_blocked_search
 
 router = APIRouter()
 
@@ -39,13 +40,16 @@ async def generate_and_send_meme(target: str, response_url: str, base_url: str) 
     """Background task to generate meme and send ephemeral preview with button."""
     try:
         # Import here to avoid circular dependency
-        from urllib.parse import quote
+        from urllib.parse import quote, urlencode
 
         from app.services.logo_api import search_logo
         from app.services.twitter import get_twitter_avatar, is_twitter_username
 
+        if is_blocked_search(target):
+            raise ValueError("Not a supported meme target")
+
         # Determine if it's a Twitter username or company domain
-        if is_twitter_username(target):
+        if target.startswith("@") and is_twitter_username(target):
             image_url = await get_twitter_avatar(target)
         else:
             image_url = await search_logo(target)
@@ -54,7 +58,9 @@ async def generate_and_send_meme(target: str, response_url: str, base_url: str) 
         await generate_meme(image_url)
 
         # Create URL for the generated meme
-        meme_url = f"{base_url}/generate-meme?image_url={quote(image_url)}"
+        encoded_image_url = quote(image_url, safe="")
+        query_string = urlencode({"filename": target.lstrip("@")})
+        meme_url = f"{base_url}/img/{encoded_image_url}?{query_string}"
 
         # Replace the "Yelling at..." message with ephemeral preview and button
         async with httpx.AsyncClient(timeout=30.0) as client:
@@ -138,6 +144,12 @@ async def old_man_yells_at(request: Request, background_tasks: BackgroundTasks):
         }
 
     target = text.strip()
+
+    if is_blocked_search(target):
+        return {
+            "response_type": "ephemeral",
+            "text": "That looks like a web probe path, not a company or handle.",
+        }
 
     # Get base URL from request
     base_url = f"{request.url.scheme}://{request.url.netloc}"

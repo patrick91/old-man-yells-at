@@ -6,7 +6,7 @@
     <title>Old Man Yells At — instant Grampa Simpson memes</title>
     <meta
       name="description"
-      content="Type any company domain or @handle and watch a furious old man yell at their logo. Free, instant, and available as an API."
+      content="Type any company, domain, or @handle and watch a furious old man yell at their logo. Free, instant, and available as an API."
     />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/logo.png" />
@@ -164,7 +164,7 @@
           <p
             class="mx-auto mt-6 max-w-[44ch] text-lg text-pretty text-neutral-600 sm:text-xl"
           >
-            Type a company domain or an @handle. Grampa does the furious part.
+            Type a company, domain, or an @handle. Grampa does the furious part.
           </p>
 
           <!-- Generator -->
@@ -172,7 +172,7 @@
             id="yell-form"
             class="mx-auto mt-8 flex max-w-xl items-center gap-2 rounded-2xl bg-white p-2 shadow-sm ring-1 ring-neutral-900/10 focus-within:ring-2 focus-within:ring-neutral-900"
           >
-            <label for="target" class="sr-only">Company domain or @handle</label>
+            <label for="target" class="sr-only">Company, domain, or @handle</label>
             <input
               id="target"
               name="target"
@@ -255,7 +255,7 @@
                   Nothing to yell at
                 </p>
                 <p class="max-w-[28ch] text-sm text-pretty text-neutral-500">
-                  Couldn't find that one. Try a real domain like stripe.com or an
+                  Couldn't find that one. Try a company like Stripe, a domain like stripe.com, or an
                   @handle.
                 </p>
               </div>
@@ -486,8 +486,8 @@
                 Type a target
               </dt>
               <dd class="mt-2 text-base/7 text-pretty text-neutral-600">
-                A company domain like stripe.com pulls their logo. An @handle
-                grabs that profile photo straight from X.
+                A company or domain like stripe.com pulls their logo from
+                Logo.dev. An @handle grabs that profile photo straight from X.
               </dd>
             </div>
 
@@ -563,9 +563,9 @@
 
               <dl class="mt-8 space-y-5">
                 <div class="border-l-2 border-amber-400/60 pl-4">
-                  <dt class="font-mono text-base text-amber-300">GET /{domain}</dt>
+                  <dt class="font-mono text-base text-amber-300">GET /{search}</dt>
                   <dd class="mt-1 text-base/7 text-neutral-400">
-                    Yell at a company by domain — fetches and crops their logo.
+                    Yell at a company by name or domain — fetches and crops their logo.
                   </dd>
                 </div>
                 <div class="border-l-2 border-amber-400/60 pl-4">
@@ -578,6 +578,12 @@
                   <dt class="font-mono text-base text-amber-300">GET /gh/{handle}</dt>
                   <dd class="mt-1 text-base/7 text-neutral-400">
                     Yell at a GitHub user — pulls their avatar.
+                  </dd>
+                </div>
+                <div class="border-l-2 border-amber-400/60 pl-4">
+                  <dt class="font-mono text-base text-amber-300">GET /img/{image-url}</dt>
+                  <dd class="mt-1 text-base/7 text-neutral-400">
+                    Yell at an image URL — pass the URL encoded in the path.
                   </dd>
                 </div>
               </dl>
@@ -612,7 +618,10 @@ curl -O <span class="js-base">https://oldmanyells.at</span>/stripe.com
 curl -O <span class="js-base">https://oldmanyells.at</span>/x/elonmusk
 
 <span class="text-neutral-500"># yell at a GitHub user</span>
-curl -O <span class="js-base">https://oldmanyells.at</span>/gh/torvalds</code></pre>
+curl -O <span class="js-base">https://oldmanyells.at</span>/gh/torvalds
+
+<span class="text-neutral-500"># yell at an image URL</span>
+curl -O <span class="js-base">https://oldmanyells.at</span>/img/https%3A%2F%2Fexample.com%2Flogo.png</code></pre>
               </div>
             </div>
           </div>
@@ -770,6 +779,13 @@ curl -O <span class="js-base">https://oldmanyells.at</span>/gh/torvalds</code></
         }
       }
 
+      function memePath(value) {
+        if (/^@[A-Za-z0-9_]{1,15}$/.test(value)) {
+          return "/x/" + encodeURIComponent(value.slice(1));
+        }
+        return "/" + encodeURIComponent(value);
+      }
+
       function yellAt(value) {
         const v = (value || "").trim();
         if (!v) {
@@ -782,7 +798,7 @@ curl -O <span class="js-base">https://oldmanyells.at</span>/gh/torvalds</code></
         errorBox.classList.remove("flex");
         loading.classList.remove("hidden");
         img.classList.add("opacity-0");
-        img.src = "/" + encodeURIComponent(v);
+        img.src = memePath(v);
       }
 
       form.addEventListener("submit", (e) => {

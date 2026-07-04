@@ -1,6 +1,7 @@
 """Visual regression tests for meme generation using pytest-image-snapshot."""
 
 from io import BytesIO
+from urllib.parse import quote
 
 import httpx
 import respx
@@ -30,9 +31,8 @@ def test_generate_meme_snapshot(image_snapshot):
     )
 
     response = client.get(
-        "/generate-meme",
+        f"/img/{quote('https://example.com/test-logo.png', safe='')}",
         params={
-            "image_url": "https://example.com/test-logo.png",
             "filename": "test-meme.png",
         },
     )
@@ -68,7 +68,7 @@ def test_twitter_meme_snapshot(image_snapshot):
         return_value=httpx.Response(200, content=test_avatar)
     )
 
-    response = client.get("/@patrick91")
+    response = client.get("/x/patrick91")
 
     assert response.status_code == 200
     assert response.headers["content-type"] == "image/png"
@@ -97,7 +97,7 @@ def test_logo_meme_snapshot(image_snapshot):
 
     # Mock the logo image download
     test_logo = create_test_image(300, 300, (50, 100, 200))
-    respx.get("https://logo.dev/python&format=png").mock(
+    respx.get("https://logo.dev/python?format=png").mock(
         return_value=httpx.Response(200, content=test_logo)
     )
 
@@ -120,9 +120,7 @@ def test_meme_with_large_image_snapshot(image_snapshot):
         return_value=httpx.Response(200, content=test_img)
     )
 
-    response = client.get(
-        "/generate-meme", params={"image_url": "https://example.com/large.png"}
-    )
+    response = client.get(f"/img/{quote('https://example.com/large.png', safe='')}")
 
     assert response.status_code == 200
 

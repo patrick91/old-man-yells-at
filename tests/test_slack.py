@@ -67,6 +67,37 @@ def test_slack_command_without_text():
 
 
 @respx.mock
+def test_slack_command_with_probe_path_rejected():
+    """Test slash command rejects scanner/probe-looking paths."""
+    logo_api_route = respx.get("https://api.logo.dev/search").mock(
+        return_value=httpx.Response(200, json=[])
+    )
+
+    timestamp = str(int(time.time()))
+    data = {
+        "text": "wp-login.php",
+        "response_url": "https://hooks.slack.com/commands/123",
+    }
+    secret = "test-secret"
+    signature = create_slack_signature(data, timestamp, secret)
+
+    with patch("app.config.SLACK_SIGNING_SECRET", secret):
+        response = client.post(
+            "/slack/commands/old-man-yells-at",
+            data=data,
+            headers={
+                "X-Slack-Request-Timestamp": timestamp,
+                "X-Slack-Signature": signature,
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.json()["response_type"] == "ephemeral"
+    assert "web probe path" in response.json()["text"]
+    assert not logo_api_route.called
+
+
+@respx.mock
 def test_slack_command_with_twitter_username():
     """Test slash command with a Twitter username."""
     # Mock Twitter profile page
@@ -135,7 +166,7 @@ def test_slack_command_with_company_domain():
 
     # Mock logo download
     test_logo = create_test_image(300, 300)
-    respx.get("https://logo.dev/python&format=png").mock(
+    respx.get("https://logo.dev/python?format=png").mock(
         return_value=httpx.Response(200, content=test_logo)
     )
 
