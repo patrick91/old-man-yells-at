@@ -6,7 +6,7 @@
     <title>Old Man Yells At — instant Grampa Simpson memes</title>
     <meta
       name="description"
-      content="Type any company, domain, or @handle and watch a furious old man yell at their logo. Free, instant, and available as an API."
+      content="Type any company, domain, @handle, or Python term and watch a furious old man yell at it. Free, instant, and available as an API."
     />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/logo.png" />
@@ -164,7 +164,8 @@
           <p
             class="mx-auto mt-6 max-w-[44ch] text-lg text-pretty text-neutral-600 sm:text-xl"
           >
-            Type a company, domain, or an @handle. Grampa does the furious part.
+            Type a company, domain, @handle, or Python glossary term. Grampa does
+            the furious part.
           </p>
 
           <!-- Generator -->
@@ -172,7 +173,9 @@
             id="yell-form"
             class="mx-auto mt-8 flex max-w-xl items-center gap-2 rounded-2xl bg-white p-2 shadow-sm ring-1 ring-neutral-900/10 focus-within:ring-2 focus-within:ring-neutral-900"
           >
-            <label for="target" class="sr-only">Company, domain, or @handle</label>
+            <label for="target" class="sr-only"
+              >Company, domain, @handle, or Python term</label
+            >
             <input
               id="target"
               name="target"
@@ -180,7 +183,7 @@
               autocomplete="off"
               autocapitalize="off"
               spellcheck="false"
-              placeholder="fastapi or stripe.com"
+              placeholder="fastapi, @handle, or py: free-threading"
               class="min-w-0 grow bg-transparent px-3 text-base text-neutral-900 placeholder:text-neutral-400 focus:outline-none"
             />
             <button
@@ -209,6 +212,13 @@
             >
               github.com
             </button>
+            <button
+              type="button"
+              data-target="py: free-threading"
+              class="rounded-full bg-white px-3 py-1 font-medium text-neutral-700 ring-1 ring-neutral-900/10 hover:bg-neutral-50"
+            >
+              py: free-threading
+            </button>
           </div>
 
           <!-- Live preview -->
@@ -219,7 +229,7 @@
               <img
                 id="meme"
                 src="/fastapi"
-                alt="An old man yelling at the chosen logo"
+                alt="An old man yelling at the chosen target"
                 class="block w-full opacity-0 transition-opacity duration-300"
                 onerror="memeError(this)"
                 onload="memeLoaded(this)"
@@ -256,7 +266,7 @@
                 </p>
                 <p class="max-w-[28ch] text-sm text-pretty text-neutral-500">
                   Couldn't find that one. Try a company like Stripe, a domain like stripe.com, or an
-                  @handle.
+                  @handle—or prefix a Python term with <span class="font-mono">py:</span>.
                 </p>
               </div>
             </div>
@@ -487,7 +497,8 @@
               </dt>
               <dd class="mt-2 text-base/7 text-pretty text-neutral-600">
                 A company or domain like stripe.com pulls their logo from
-                Logo.dev. An @handle grabs that profile photo straight from X.
+                Logo.dev. An @handle grabs that profile photo straight from X,
+                while <span class="font-mono">py:</span> renders a Python term.
               </dd>
             </div>
 
@@ -581,6 +592,12 @@
                   </dd>
                 </div>
                 <div class="border-l-2 border-amber-400/60 pl-4">
+                  <dt class="font-mono text-base text-amber-300">GET /py/{term}</dt>
+                  <dd class="mt-1 text-base/7 text-neutral-400">
+                    Yell at a Python glossary term — renders the term literally.
+                  </dd>
+                </div>
+                <div class="border-l-2 border-amber-400/60 pl-4">
                   <dt class="font-mono text-base text-amber-300">GET /img/{image-url}</dt>
                   <dd class="mt-1 text-base/7 text-neutral-400">
                     Yell at an image URL — pass the URL encoded in the path.
@@ -619,6 +636,9 @@ curl -O <span class="js-base">https://oldmanyells.at</span>/x/elonmusk
 
 <span class="text-neutral-500"># yell at a GitHub user</span>
 curl -O <span class="js-base">https://oldmanyells.at</span>/gh/torvalds
+
+<span class="text-neutral-500"># yell at a Python term</span>
+curl -O <span class="js-base">https://oldmanyells.at</span>/py/free-threading
 
 <span class="text-neutral-500"># yell at an image URL</span>
 curl -O <span class="js-base">https://oldmanyells.at</span>/img/https%3A%2F%2Fexample.com%2Flogo.png</code></pre>
@@ -780,10 +800,20 @@ curl -O <span class="js-base">https://oldmanyells.at</span>/img/https%3A%2F%2Fex
       }
 
       function memePath(value) {
+        const pythonTerm = value.match(/^\/?py(?:\s*:|\/)\s*(.+)$/i);
+        if (pythonTerm) {
+          const slug = pythonTerm[1].trim().replace(/\s+/g, "-");
+          return "/py/" + encodeURIComponent(slug);
+        }
         if (/^@[A-Za-z0-9_]{1,15}$/.test(value)) {
           return "/x/" + encodeURIComponent(value.slice(1));
         }
         return "/" + encodeURIComponent(value);
+      }
+
+      function memeLabel(value) {
+        const pythonTerm = value.match(/^\/?py(?:\s*:|\/)\s*(.+)$/i);
+        return pythonTerm ? pythonTerm[1].trim().replace(/-/g, " ") : value;
       }
 
       function yellAt(value) {
@@ -793,7 +823,7 @@ curl -O <span class="js-base">https://oldmanyells.at</span>/img/https%3A%2F%2Fex
           return;
         }
         input.value = v;
-        caption.textContent = v;
+        caption.textContent = memeLabel(v);
         errorBox.classList.add("hidden");
         errorBox.classList.remove("flex");
         loading.classList.remove("hidden");

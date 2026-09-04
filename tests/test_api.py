@@ -138,6 +138,46 @@ def test_generate_github_meme():
 
 
 @respx.mock
+def test_generate_python_term_meme_does_not_use_logo_dev():
+    """Test the /py/{term} endpoint renders literal text locally."""
+    logo_api_route = respx.get("https://api.logo.dev/search").mock(
+        return_value=httpx.Response(200, json=[])
+    )
+
+    response = client.get("/py/free-threading")
+
+    assert response.status_code == snapshot(200)
+    assert response.headers["content-type"] == snapshot("image/png")
+    assert (
+        "old-man-yells-at-free-threading.png" in response.headers["content-disposition"]
+    )
+    assert not logo_api_route.called
+
+    image = Image.open(BytesIO(response.content))
+    assert image.format == snapshot("PNG")
+    assert image.mode == snapshot("RGBA")
+
+
+def test_generate_long_python_term_meme():
+    """Test a long glossary term is wrapped into the available target area."""
+    response = client.get("/py/asynchronous-generator-iterator")
+
+    assert response.status_code == snapshot(200)
+    assert response.headers["content-type"] == snapshot("image/png")
+    assert (
+        "old-man-yells-at-asynchronous-generator-iterator.png"
+        in response.headers["content-disposition"]
+    )
+
+
+def test_generate_python_term_meme_rejects_invalid_terms():
+    """Test empty and excessively long rendered terms are rejected."""
+    assert client.get("/py/---").status_code == snapshot(404)
+    assert client.get(f"/py/{'x' * 25}").status_code == snapshot(404)
+    assert client.get(f"/py/{'x' * 81}").status_code == snapshot(404)
+
+
+@respx.mock
 def test_generate_logo_meme_filename():
     """Test the /{search} endpoint uses the standard save filename."""
     logo_api_response = [

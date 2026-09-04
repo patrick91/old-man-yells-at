@@ -111,6 +111,17 @@ def test_logo_meme_snapshot(image_snapshot):
     image_snapshot(image, "tests/snapshots/test_logo_meme.png", threshold=0.1)
 
 
+def test_python_term_meme_snapshot(image_snapshot):
+    """Test the Python term card layout as part of the composed meme."""
+    response = client.get("/py/free-threading")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "image/png"
+
+    image = Image.open(BytesIO(response.content))
+    image_snapshot(image, "tests/snapshots/test_python_term_meme.png", threshold=0.1)
+
+
 @respx.mock
 def test_meme_with_large_image_snapshot(image_snapshot):
     """Test meme generation with a large image that gets resized."""

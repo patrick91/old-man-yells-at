@@ -9,11 +9,14 @@ from fastapi.responses import StreamingResponse
 
 from app.services.github import github_avatar_url
 from app.services.logo_api import search_logo
-from app.services.meme_generator import generate_meme as generate_meme_bytes
+from app.services.meme_generator import generate_meme, generate_text_meme
 from app.services.search_filter import is_blocked_search
 from app.services.twitter import get_twitter_avatar
 
 router = APIRouter()
+
+MAX_PYTHON_TERM_LENGTH = 80
+MAX_PYTHON_TERM_WORD_LENGTH = 24
 
 
 def _meme_filename(name: str | None = None) -> str:
@@ -31,15 +34,19 @@ def _meme_filename(name: str | None = None) -> str:
     return f"{prefix}{stem}.png"
 
 
-async def _stream_meme(image_url: str, filename: str = "meme.png") -> StreamingResponse:
-    """Generate a meme from an image URL and stream it back as a PNG."""
-    meme_bytes = await generate_meme_bytes(image_url)
+def _stream_meme_bytes(meme_bytes: bytes, filename: str) -> StreamingResponse:
+    """Stream generated meme bytes back as a consistently named PNG."""
     download_filename = _meme_filename(filename)
     return StreamingResponse(
         iter([meme_bytes]),
         media_type="image/png",
         headers={"Content-Disposition": f'inline; filename="{download_filename}"'},
     )
+
+
+async def _stream_meme(image_url: str, filename: str = "meme.png") -> StreamingResponse:
+    """Generate a meme from an image URL and stream it back as a PNG."""
+    return _stream_meme_bytes(await generate_meme(image_url), filename)
 
 
 def _filename_from_image_url(image_url: str) -> str:
@@ -87,6 +94,28 @@ async def generate_github_meme(handle: str):
     username = handle.lstrip("@")
     image_url = github_avatar_url(username)
     return await _stream_meme(image_url, username)
+
+
+def _python_term_label(term: str) -> str:
+    """Turn a URL-friendly Python term into safe display text."""
+    label = " ".join(unquote(term).replace("-", " ").split())
+
+    if (
+        not label
+        or len(label) > MAX_PYTHON_TERM_LENGTH
+        or any(len(word) > MAX_PYTHON_TERM_WORD_LENGTH for word in label.split())
+        or not label.isprintable()
+    ):
+        raise HTTPException(status_code=404, detail="Not a supported Python term")
+
+    return label
+
+
+@router.get("/py/{term}")
+def generate_python_term_meme(term: str):
+    """Generate a meme yelling at a literal Python glossary term."""
+    label = _python_term_label(term)
+    return _stream_meme_bytes(generate_text_meme(label), term)
 
 
 @router.get("/{search}")

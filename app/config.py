@@ -11,6 +11,7 @@ SLACK_BOT_TOKEN = os.getenv("SLACK_BOT_TOKEN")
 
 # Template configuration
 TEMPLATE_PATH = os.path.join("assets", "template.png")
+TEXT_FONT_PATH = os.path.join("assets", "fonts", "Oswald.ttf")
 
 # Meme generation configuration
 DEFAULT_LEFT_ANCHOR = 230
